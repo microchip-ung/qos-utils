@@ -189,7 +189,8 @@ static int lan966x_psfp_sf_conf_get(uint32_t sfi_id,
 
 	rc = nl_recvmsgs_default(sk);
 	if (rc < 0) {
-		printf("nl_recvmsgs_default() failed, rc: %d\n", rc);
+		printf("nl_recvmsgs_default() failed, rc: %d (%s)\n", rc,
+		       nl_geterror(rc));
 		goto nla_put_failure;
 	}
 
@@ -223,7 +224,8 @@ static int lan966x_psfp_sf_conf_set(uint32_t sfi_id,
 
 	rc = nl_recvmsgs_default(sk);
 	if (rc < 0)
-		printf("nl_recvmsgs_default() failed, rc: %d\n", rc);
+		printf("nl_recvmsgs_default() failed, rc: %d (%s)\n", rc,
+		       nl_geterror(rc));
 
 nla_put_failure:
 	nlmsg_free(msg);
@@ -280,7 +282,8 @@ static void lan966x_psfp_sf_status_get(uint32_t sfi_id)
 
 	rc = nl_recvmsgs_default(sk);
 	if (rc < 0) {
-		printf("nl_recvmsgs_default() failed, rc: %d\n", rc);
+		printf("nl_recvmsgs_default() failed, rc: %d (%s)\n", rc,
+		       nl_geterror(rc));
 		goto nla_put_failure;
 	}
 
@@ -415,7 +418,8 @@ static int lan966x_psfp_sg_conf_get(uint32_t sgi_id,
 
 	rc = nl_recvmsgs_default(sk);
 	if (rc < 0) {
-		printf("nl_recvmsgs_default() failed, rc: %d\n", rc);
+		printf("nl_recvmsgs_default() failed, rc: %d (%s)\n", rc,
+		       nl_geterror(rc));
 		goto nla_put_failure;
 	}
 
@@ -449,7 +453,8 @@ static int lan966x_psfp_sg_conf_set(uint32_t sgi_id,
 
 	rc = nl_recvmsgs_default(sk);
 	if (rc < 0)
-		printf("nl_recvmsgs_default() failed, rc: %d\n", rc);
+		printf("nl_recvmsgs_default() failed, rc: %d (%s)\n", rc,
+		       nl_geterror(rc));
 
 nla_put_failure:
 	nlmsg_free(msg);
@@ -506,7 +511,8 @@ static void lan966x_psfp_sg_status_get(uint32_t sgi_id)
 
 	rc = nl_recvmsgs_default(sk);
 	if (rc < 0) {
-		printf("nl_recvmsgs_default() failed, rc: %d\n", rc);
+		printf("nl_recvmsgs_default() failed, rc: %d (%s)\n", rc,
+		       nl_geterror(rc));
 		goto nla_put_failure;
 	}
 
@@ -700,7 +706,8 @@ static int lan966x_psfp_gce_conf_get(uint32_t sgi_id, uint32_t gce_id,
 
 	rc = nl_recvmsgs_default(sk);
 	if (rc < 0) {
-		printf("nl_recvmsgs_default() failed, rc: %d\n", rc);
+		printf("nl_recvmsgs_default() failed, rc: %d (%s)\n", rc,
+		       nl_geterror(rc));
 		goto nla_put_failure;
 	}
 
@@ -735,7 +742,8 @@ static int lan966x_psfp_gce_conf_set(uint32_t sgi_id, uint32_t gce_id,
 
 	rc = nl_recvmsgs_default(sk);
 	if (rc < 0)
-		printf("nl_recvmsgs_default() failed, rc: %d\n", rc);
+		printf("nl_recvmsgs_default() failed, rc: %d (%s)\n", rc,
+		       nl_geterror(rc));
 
 nla_put_failure:
 	nlmsg_free(msg);
@@ -793,7 +801,8 @@ static void lan966x_psfp_gce_status_get(uint32_t sgi_id, uint32_t gce_id)
 
 	rc = nl_recvmsgs_default(sk);
 	if (rc < 0) {
-		printf("nl_recvmsgs_default() failed, rc: %d\n", rc);
+		printf("nl_recvmsgs_default() failed, rc: %d (%s)\n", rc,
+		       nl_geterror(rc));
 		goto nla_put_failure;
 	}
 
@@ -939,7 +948,8 @@ static int lan966x_psfp_fm_conf_get(uint32_t fmi_id,
 
 	rc = nl_recvmsgs_default(sk);
 	if (rc < 0) {
-		printf("nl_recvmsgs_default() failed, rc: %d\n", rc);
+		printf("nl_recvmsgs_default() failed, rc: %d (%s)\n", rc,
+		       nl_geterror(rc));
 		goto nla_put_failure;
 	}
 
@@ -973,7 +983,8 @@ static int lan966x_psfp_fm_conf_set(uint32_t fmi_id,
 
 	rc = nl_recvmsgs_default(sk);
 	if (rc < 0)
-		printf("nl_recvmsgs_default() failed, rc: %d\n", rc);
+		printf("nl_recvmsgs_default() failed, rc: %d (%s)\n", rc,
+		       nl_geterror(rc));
 
 nla_put_failure:
 	nlmsg_free(msg);

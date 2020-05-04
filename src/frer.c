@@ -87,7 +87,8 @@ static int lan966x_frer_genl_cs_cfg_set(u32 cs_id,
 
 	rc = nl_recvmsgs_default(sk);
 	if (rc < 0)
-		printf("nl_recvmsgs_default() failed, rc: %d\n", rc);
+		printf("nl_recvmsgs_default() failed, rc: %d (%s)\n", rc,
+		       nl_geterror(rc));
 
 nla_put_failure:
 	nlmsg_free(msg);
@@ -144,7 +145,8 @@ static int lan966x_frer_genl_cs_cfg_get(u32 cs_id,
 
 	rc = nl_recvmsgs_default(sk);
 	if (rc < 0) {
-		printf("nl_recvmsgs_default() failed, rc: %d\n", rc);
+		printf("nl_recvmsgs_default() failed, rc: %d (%s)\n", rc,
+		       nl_geterror(rc));
 		goto nla_put_failure;
 	}
 
@@ -204,7 +206,8 @@ static int lan966x_frer_genl_cs_cnt_get(u32 cs_id, struct lan966x_frer_cnt *cnt)
 
 	rc = nl_recvmsgs_default(sk);
 	if (rc < 0) {
-		printf("nl_recvmsgs_default() failed, rc: %d\n", rc);
+		printf("nl_recvmsgs_default() failed, rc: %d (%s)\n", rc,
+		       nl_geterror(rc));
 		goto nla_put_failure;
 	}
 
@@ -237,7 +240,8 @@ static int lan966x_frer_genl_cs_cnt_clr(u32 cs_id)
 
 	rc = nl_recvmsgs_default(sk);
 	if (rc < 0)
-		printf("nl_recvmsgs_default() failed, rc: %d\n", rc);
+		printf("nl_recvmsgs_default() failed, rc: %d (%s)\n", rc,
+		       nl_geterror(rc));
 
 nla_put_failure:
 	nlmsg_free(msg);
@@ -401,7 +405,8 @@ static int lan966x_frer_genl_ms_alloc(u32 ifindex1, u32 ifindex2, u32 *ms_id)
 
 	rc = nl_recvmsgs_default(sk);
 	if (rc < 0) {
-		printf("nl_recvmsgs_default() failed, rc: %d\n", rc);
+		printf("nl_recvmsgs_default() failed, rc: %d (%s)\n", rc,
+		       nl_geterror(rc));
 		goto nla_put_failure;
 	}
 
@@ -492,7 +497,8 @@ static int lan966x_frer_genl_ms_free(u32 ms_id)
 
 	rc = nl_recvmsgs_default(sk);
 	if (rc < 0)
-		printf("nl_recvmsgs_default() failed, rc: %d\n", rc);
+		printf("nl_recvmsgs_default() failed, rc: %d (%s)\n", rc,
+		       nl_geterror(rc));
 
 nla_put_failure:
 	nlmsg_free(msg);
@@ -561,7 +567,8 @@ static int lan966x_frer_genl_ms_cfg_set(u32 ifindex, u32 ms_id,
 
 	rc = nl_recvmsgs_default(sk);
 	if (rc < 0)
-		printf("nl_recvmsgs_default() failed, rc: %d\n", rc);
+		printf("nl_recvmsgs_default() failed, rc: %d (%s)\n", rc,
+		       nl_geterror(rc));
 
 nla_put_failure:
 	nlmsg_free(msg);
@@ -619,7 +626,8 @@ static int lan966x_frer_genl_ms_cfg_get(u32 ifindex, u32 ms_id,
 
 	rc = nl_recvmsgs_default(sk);
 	if (rc < 0) {
-		printf("nl_recvmsgs_default() failed, rc: %d\n", rc);
+		printf("nl_recvmsgs_default() failed, rc: %d (%s)\n", rc,
+		       nl_geterror(rc));
 		goto nla_put_failure;
 	}
 
@@ -680,7 +688,8 @@ static int lan966x_frer_genl_ms_cnt_get(u32 ifindex, u32 ms_id, struct lan966x_f
 
 	rc = nl_recvmsgs_default(sk);
 	if (rc < 0) {
-		printf("nl_recvmsgs_default() failed, rc: %d\n", rc);
+		printf("nl_recvmsgs_default() failed, rc: %d (%s)\n", rc,
+		       nl_geterror(rc));
 		goto nla_put_failure;
 	}
 
@@ -714,7 +723,8 @@ static int lan966x_frer_genl_ms_cnt_clr(u32 ifindex, u32 ms_id)
 
 	rc = nl_recvmsgs_default(sk);
 	if (rc < 0)
-		printf("nl_recvmsgs_default() failed, rc: %d\n", rc);
+		printf("nl_recvmsgs_default() failed, rc: %d (%s)\n", rc,
+		       nl_geterror(rc));
 
 nla_put_failure:
 	nlmsg_free(msg);
@@ -879,7 +889,8 @@ static int lan966x_frer_genl_iflow_cfg_set(u32 id,
 
 	rc = nl_recvmsgs_default(sk);
 	if (rc < 0)
-		printf("nl_recvmsgs_default() failed, rc: %d\n", rc);
+		printf("nl_recvmsgs_default() failed, rc: %d (%s)\n", rc,
+		       nl_geterror(rc));
 
 nla_put_failure:
 	nlmsg_free(msg);
@@ -948,7 +959,8 @@ static int lan966x_frer_genl_iflow_cfg_get(u32 id,
 
 	rc = nl_recvmsgs_default(sk);
 	if (rc < 0) {
-		printf("nl_recvmsgs_default() failed, rc: %d\n", rc);
+		printf("nl_recvmsgs_default() failed, rc: %d (%s)\n", rc,
+		       nl_geterror(rc));
 		goto nla_put_failure;
 	}
 
@@ -1089,7 +1101,8 @@ static int lan966x_frer_genl_vlan_cfg_set(u32 vid,
 
 	rc = nl_recvmsgs_default(sk);
 	if (rc < 0)
-		printf("nl_recvmsgs_default() failed, rc: %d\n", rc);
+		printf("nl_recvmsgs_default() failed, rc: %d (%s)\n", rc,
+		       nl_geterror(rc));
 
 nla_put_failure:
 	nlmsg_free(msg);
@@ -1146,7 +1159,8 @@ static int lan966x_frer_genl_vlan_cfg_get(u32 vid,
 
 	rc = nl_recvmsgs_default(sk);
 	if (rc < 0) {
-		printf("nl_recvmsgs_default() failed, rc: %d\n", rc);
+		printf("nl_recvmsgs_default() failed, rc: %d (%s)\n", rc,
+		       nl_geterror(rc));
 		goto nla_put_failure;
 	}
 

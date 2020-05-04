@@ -167,7 +167,8 @@ void lan966x_conf_set(uint32_t index, struct lan966x_qos_fp_port_conf *config)
 
 	rc = nl_recvmsgs_default(sk);
 	if (rc < 0)
-		printf("nl_recvmsgs_default() failed, rc: %d\n", rc);
+		printf("nl_recvmsgs_default() failed, rc: %d (%s)\n", rc,
+		       nl_geterror(rc));
 
 nla_put_failure:
 	nlmsg_free(msg);
@@ -197,7 +198,8 @@ void lan966x_conf_get(uint32_t index, struct lan966x_qos_fp_port_conf *config)
 
 	rc = nl_recvmsgs_default(sk);
 	if (rc < 0)
-		printf("nl_recvmsgs_default() failed, rc: %d\n", rc);
+		printf("nl_recvmsgs_default() failed, rc: %d (%s)\n", rc,
+		       nl_geterror(rc));
 
 	memcpy(config, &tmp, sizeof(tmp));
 
@@ -233,7 +235,8 @@ void lan966x_status_get(uint32_t index)
 
 	rc = nl_recvmsgs_default(sk);
 	if (rc < 0) {
-		printf("nl_recvmsgs_default() failed, rc: %d\n", rc);
+		printf("nl_recvmsgs_default() failed, rc: %d (%s)\n", rc,
+		       nl_geterror(rc));
 		goto nla_put_failure;
 	}
 
