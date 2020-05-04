@@ -1,15 +1,10 @@
 /*
  * License: Dual MIT/GPL
- * Copyright (c) 2019 Microsemi Corporation
+ * Copyright (c) 2020 Microsemi Corporation
  */
 
-#include <stdio.h>
-#include <stdint.h>
-#include <unistd.h>
+#include "common.h"
 #include <getopt.h>
-#include <netlink/genl/genl.h>
-#include <netlink/genl/ctrl.h>
-#include <linux/types.h>
 #include <net/if.h>
 
 enum lan966x_qos_fp_port_attr {
@@ -78,60 +73,6 @@ static char *get_status_verify(enum lan966x_mm_status_verify status)
 	}
 
 	return "Unknown";
-}
-
-static int mchp_genl_start(const char *family_name, uint8_t cmd,
-			   uint8_t version, struct nl_sock **skp,
-			   struct nl_msg **msgp)
-{
-	int err, family_id;
-
-	*skp = nl_socket_alloc();
-	if (!*skp) {
-		printf("nl_socket_alloc() failed\n");
-		return -1;
-	}
-
-	err = genl_connect(*skp);
-	if (err < 0) {
-		printf("genl_connect() failed\n");
-		goto err_free_socket;
-	}
-
-	err = genl_ctrl_resolve(*skp, family_name);
-	if (err < 0) {
-		printf("genl_ctrl_resolve() failed\n");
-		goto err_free_socket;
-	}
-	family_id = err;
-
-	*msgp = nlmsg_alloc();
-	if (!*msgp) {
-		printf("nlmsg_alloc() failed\n");
-		err = -1;
-		goto err_free_socket;
-	}
-
-	if (!genlmsg_put(*msgp,
-			 NL_AUTO_PORT,
-			 NL_AUTO_SEQ,
-			 family_id,
-			 0,
-			 NLM_F_REQUEST | NLM_F_ACK,
-			 cmd,
-			 version)) {
-		printf("genlmsg_put() failed\n");
-		goto nla_put_failure;
-	}
-
-	return 0;
-
-nla_put_failure:
-	nlmsg_free(*msgp);
-
-err_free_socket:
-	nl_socket_free(*skp);
-	return err;
 }
 
 static struct option long_options[] =
@@ -212,8 +153,8 @@ void lan966x_conf_set(uint32_t index, struct lan966x_qos_fp_port_conf *config)
 	struct nl_msg *msg;
 	int rc;
 
-	rc = mchp_genl_start("lan966x_netlink",
-			     LAN966X_QOS_FP_PORT_GENL_CONF_SET, 1, &sk, &msg);
+	rc = lan966x_genl_start("lan966x_netlink",
+				LAN966X_QOS_FP_PORT_GENL_CONF_SET, 1, &sk, &msg);
 
 	NLA_PUT(msg, LAN966X_QOS_FP_PORT_ATTR_CONF, sizeof(*config), config);
 	NLA_PUT_U32(msg, LAN966X_QOS_FP_PORT_ATTR_IDX, index);
@@ -240,8 +181,8 @@ void lan966x_conf_get(uint32_t index, struct lan966x_qos_fp_port_conf *config)
 	struct nl_msg *msg;
 	int rc;
 
-	rc = mchp_genl_start("lan966x_netlink",
-			     LAN966X_QOS_FP_PORT_GENL_CONF_GET, 1, &sk, &msg);
+	rc = lan966x_genl_start("lan966x_netlink",
+				LAN966X_QOS_FP_PORT_GENL_CONF_GET, 1, &sk, &msg);
 
 	nl_socket_modify_cb(sk, NL_CB_VALID, NL_CB_CUSTOM,
 			    lan966x_qos_fp_port_read_conf, &tmp);
@@ -276,8 +217,8 @@ void lan966x_status_get(uint32_t index)
 	memset(&status, 0x0, sizeof(status));
 	memset(ifname, 0, IF_NAMESIZE);
 
-	rc = mchp_genl_start("lan966x_netlink",
-			     LAN966X_QOS_FP_PORT_GENL_STATUS_GET, 1, &sk, &msg);
+	rc = lan966x_genl_start("lan966x_netlink",
+				LAN966X_QOS_FP_PORT_GENL_STATUS_GET, 1, &sk, &msg);
 
 	nl_socket_modify_cb(sk, NL_CB_VALID, NL_CB_CUSTOM,
 			    lan966x_qos_fp_port_read_status, &status);

@@ -3,17 +3,9 @@
  * Copyright (c) 2020 Microchip Corporation
  */
 
-#include <stdio.h>
-#include <stdint.h>
-#include <unistd.h>
+#include "common.h"
 #include <getopt.h>
-#include <netlink/genl/genl.h>
-#include <netlink/genl/ctrl.h>
-#include <linux/types.h>
-#include <net/if.h>
-#include <stdbool.h>
 
-#define COUNT_OF(x) ((sizeof(x)/sizeof(0[x])) / ((size_t)(!(sizeof(x) % sizeof(0[x])))))
 #define LAN966X_PSFP_NETLINK	"lan966x_psfp_nl"
 
 enum lan966x_psfp_attr {
@@ -150,60 +142,6 @@ struct command
 	char *(*help)(void);
 };
 
-static int mchp_genl_start(const char *family_name, uint8_t cmd,
-			   uint8_t version, struct nl_sock **skp,
-			   struct nl_msg **msgp)
-{
-	int err, family_id;
-
-	*skp = nl_socket_alloc();
-	if (!*skp) {
-		printf("nl_socket_alloc() failed\n");
-		return -1;
-	}
-
-	err = genl_connect(*skp);
-	if (err < 0) {
-		printf("genl_connect() failed\n");
-		goto err_free_socket;
-	}
-
-	err = genl_ctrl_resolve(*skp, family_name);
-	if (err < 0) {
-		printf("genl_ctrl_resolve() failed\n");
-		goto err_free_socket;
-	}
-	family_id = err;
-
-	*msgp = nlmsg_alloc();
-	if (!*msgp) {
-		printf("nlmsg_alloc() failed\n");
-		err = -1;
-		goto err_free_socket;
-	}
-
-	if (!genlmsg_put(*msgp,
-			 NL_AUTO_PORT,
-			 NL_AUTO_SEQ,
-			 family_id,
-			 0,
-			 NLM_F_REQUEST | NLM_F_ACK,
-			 cmd,
-			 version)) {
-		printf("genlmsg_put() failed\n");
-		goto nla_put_failure;
-	}
-
-	return 0;
-
-nla_put_failure:
-	nlmsg_free(*msgp);
-
-err_free_socket:
-	nl_socket_free(*skp);
-	return err;
-}
-
 static int lan966x_psfp_sf_conf_read(struct nl_msg *msg, void *arg)
 {
 	struct genlmsghdr *hdr = nlmsg_data(nlmsg_hdr(msg));
@@ -235,8 +173,8 @@ static int lan966x_psfp_sf_conf_get(uint32_t sfi_id,
 	struct nl_msg *msg;
 	int rc = 0;
 
-	rc = mchp_genl_start(LAN966X_PSFP_NETLINK,
-			     LAN966X_PSFP_SF_GENL_CONF_GET, 1, &sk, &msg);
+	rc = lan966x_genl_start(LAN966X_PSFP_NETLINK,
+				LAN966X_PSFP_SF_GENL_CONF_GET, 1, &sk, &msg);
 
 	nl_socket_modify_cb(sk, NL_CB_VALID, NL_CB_CUSTOM,
 			    lan966x_psfp_sf_conf_read, &tmp);
@@ -271,8 +209,8 @@ static int lan966x_psfp_sf_conf_set(uint32_t sfi_id,
 	struct nl_msg *msg;
 	int rc = 0;
 
-	rc = mchp_genl_start(LAN966X_PSFP_NETLINK,
-			     LAN966X_PSFP_SF_GENL_CONF_SET, 1, &sk, &msg);
+	rc = lan966x_genl_start(LAN966X_PSFP_NETLINK,
+				LAN966X_PSFP_SF_GENL_CONF_SET, 1, &sk, &msg);
 
 	NLA_PUT(msg, LAN966X_PSFP_SF_ATTR_CONF, sizeof(*conf), conf);
 	NLA_PUT_U32(msg, LAN966X_PSFP_SF_ATTR_SFI, sfi_id);
@@ -326,8 +264,8 @@ static void lan966x_psfp_sf_status_get(uint32_t sfi_id)
 
 	memset(&counters, 0x0, sizeof(counters));
 
-	rc = mchp_genl_start(LAN966X_PSFP_NETLINK,
-			     LAN966X_PSFP_SF_GENL_STATUS_GET, 1, &sk, &msg);
+	rc = lan966x_genl_start(LAN966X_PSFP_NETLINK,
+				LAN966X_PSFP_SF_GENL_STATUS_GET, 1, &sk, &msg);
 
 	nl_socket_modify_cb(sk, NL_CB_VALID, NL_CB_CUSTOM,
 			    lan966x_psfp_sf_counters_read, &counters);
@@ -461,8 +399,8 @@ static int lan966x_psfp_sg_conf_get(uint32_t sgi_id,
 	struct nl_msg *msg;
 	int rc = 0;
 
-	rc = mchp_genl_start(LAN966X_PSFP_NETLINK,
-			     LAN966X_PSFP_SG_GENL_CONF_GET, 1, &sk, &msg);
+	rc = lan966x_genl_start(LAN966X_PSFP_NETLINK,
+				LAN966X_PSFP_SG_GENL_CONF_GET, 1, &sk, &msg);
 
 	nl_socket_modify_cb(sk, NL_CB_VALID, NL_CB_CUSTOM,
 			    lan966x_psfp_sg_conf_read, &tmp);
@@ -497,8 +435,8 @@ static int lan966x_psfp_sg_conf_set(uint32_t sgi_id,
 	struct nl_msg *msg;
 	int rc = 0;
 
-	rc = mchp_genl_start(LAN966X_PSFP_NETLINK,
-			     LAN966X_PSFP_SG_GENL_CONF_SET, 1, &sk, &msg);
+	rc = lan966x_genl_start(LAN966X_PSFP_NETLINK,
+				LAN966X_PSFP_SG_GENL_CONF_SET, 1, &sk, &msg);
 
 	NLA_PUT(msg, LAN966X_PSFP_SG_ATTR_CONF, sizeof(*conf), conf);
 	NLA_PUT_U32(msg, LAN966X_PSFP_SG_ATTR_SGI, sgi_id);
@@ -552,8 +490,8 @@ static void lan966x_psfp_sg_status_get(uint32_t sgi_id)
 
 	memset(&status, 0x0, sizeof(status));
 
-	rc = mchp_genl_start(LAN966X_PSFP_NETLINK,
-			     LAN966X_PSFP_SG_GENL_STATUS_GET, 1, &sk, &msg);
+	rc = lan966x_genl_start(LAN966X_PSFP_NETLINK,
+				LAN966X_PSFP_SG_GENL_STATUS_GET, 1, &sk, &msg);
 
 	nl_socket_modify_cb(sk, NL_CB_VALID, NL_CB_CUSTOM,
 			    lan966x_psfp_sg_status_read, &status);
@@ -745,8 +683,8 @@ static int lan966x_psfp_gce_conf_get(uint32_t sgi_id, uint32_t gce_id,
 	struct nl_msg *msg;
 	int rc = 0;
 
-	rc = mchp_genl_start(LAN966X_PSFP_NETLINK,
-			     LAN966X_PSFP_GCE_GENL_CONF_GET, 1, &sk, &msg);
+	rc = lan966x_genl_start(LAN966X_PSFP_NETLINK,
+				LAN966X_PSFP_GCE_GENL_CONF_GET, 1, &sk, &msg);
 
 	nl_socket_modify_cb(sk, NL_CB_VALID, NL_CB_CUSTOM,
 			    lan966x_psfp_gce_conf_read, &tmp);
@@ -782,8 +720,8 @@ static int lan966x_psfp_gce_conf_set(uint32_t sgi_id, uint32_t gce_id,
 	struct nl_msg *msg;
 	int rc = 0;
 
-	rc = mchp_genl_start(LAN966X_PSFP_NETLINK,
-			     LAN966X_PSFP_GCE_GENL_CONF_SET, 1, &sk, &msg);
+	rc = lan966x_genl_start(LAN966X_PSFP_NETLINK,
+				LAN966X_PSFP_GCE_GENL_CONF_SET, 1, &sk, &msg);
 
 	NLA_PUT(msg, LAN966X_PSFP_GCE_ATTR_CONF, sizeof(*conf), conf);
 	NLA_PUT_U32(msg, LAN966X_PSFP_GCE_ATTR_SGI, sgi_id);
@@ -838,8 +776,8 @@ static void lan966x_psfp_gce_status_get(uint32_t sgi_id, uint32_t gce_id)
 
 	memset(&status, 0x0, sizeof(status));
 
-	rc = mchp_genl_start(LAN966X_PSFP_NETLINK,
-			     LAN966X_PSFP_GCE_GENL_STATUS_GET, 1, &sk, &msg);
+	rc = lan966x_genl_start(LAN966X_PSFP_NETLINK,
+				LAN966X_PSFP_GCE_GENL_STATUS_GET, 1, &sk, &msg);
 
 	nl_socket_modify_cb(sk, NL_CB_VALID, NL_CB_CUSTOM,
 			    lan966x_psfp_gce_status_read, &status);
@@ -985,8 +923,8 @@ static int lan966x_psfp_fm_conf_get(uint32_t fmi_id,
 	struct nl_msg *msg;
 	int rc = 0;
 
-	rc = mchp_genl_start(LAN966X_PSFP_NETLINK,
-			     LAN966X_PSFP_FM_GENL_CONF_GET, 1, &sk, &msg);
+	rc = lan966x_genl_start(LAN966X_PSFP_NETLINK,
+				LAN966X_PSFP_FM_GENL_CONF_GET, 1, &sk, &msg);
 
 	nl_socket_modify_cb(sk, NL_CB_VALID, NL_CB_CUSTOM,
 			    lan966x_psfp_fm_conf_read, &tmp);
@@ -1021,8 +959,8 @@ static int lan966x_psfp_fm_conf_set(uint32_t fmi_id,
 	struct nl_msg *msg;
 	int rc = 0;
 
-	rc = mchp_genl_start(LAN966X_PSFP_NETLINK,
-			     LAN966X_PSFP_FM_GENL_CONF_SET, 1, &sk, &msg);
+	rc = lan966x_genl_start(LAN966X_PSFP_NETLINK,
+				LAN966X_PSFP_FM_GENL_CONF_SET, 1, &sk, &msg);
 
 	NLA_PUT(msg, LAN966X_PSFP_FM_ATTR_CONF, sizeof(*conf), conf);
 	NLA_PUT_U32(msg, LAN966X_PSFP_FM_ATTR_FMI, fmi_id);

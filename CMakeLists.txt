@@ -12,11 +12,11 @@ include_directories(include ${LIBNL_INCLUDE_DIR})
 
 include_directories(src)
 
-add_executable(fp src/fp.c)
+add_executable(fp src/fp.c src/common.c)
 target_link_libraries(fp ${LIBNL_LIBRARIES})
 install(TARGETS fp DESTINATION bin)
 
-add_executable(psfp src/psfp.c)
+add_executable(psfp src/psfp.c src/common.c)
 target_link_libraries(psfp ${LIBNL_LIBRARIES})
 install(TARGETS psfp DESTINATION bin)
 

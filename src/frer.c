@@ -5,18 +5,9 @@
 
 #include "frer.h"
 #include "common.h"
-#include <stdio.h>
-#include <stdint.h>
-#include <unistd.h>
 #include <getopt.h>
 #include <errno.h>
 #include <net/if.h>
-
-#if defined(__i386__) || defined(__x86_64__)
-#define RETURN_IF_PC return 0
-#else
-#define RETURN_IF_PC
-#endif
 
 struct command
 {
@@ -974,10 +965,10 @@ static char *lan966x_frer_iflow_help(void)
 {
 	return "--ms_enable:              Enable member stream\n"
 		" --ms_id:                  Allocated member stream ID\n"
-		" --generate:               Enable sequence generation\n"
+		" --generation:             Enable sequence generation\n"
 		" --pop:                    Enable popping of R-tag\n"
-		" --dev1:                   Split device 1\n"
-		" --dev2:                   Split device 2\n"
+		" --dev1:                   Split device 1 or '-'\n"
+		" --dev2:                   Split device 2 or '-'\n"
 		" --help:                   Show this help text\n";
 }
 
@@ -987,7 +978,7 @@ static int cmd_iflow(const struct command *cmd, int argc, char *const *argv)
 	{
 		{"ms_enable", required_argument, NULL, 'a'},
 		{"ms_id", required_argument, NULL, 'b'},
-		{"generate", required_argument, NULL, 'c'},
+		{"generation", required_argument, NULL, 'c'},
 		{"pop", required_argument, NULL, 'd'},
 		{"dev1", required_argument, NULL, 'e'},
 		{"dev2", required_argument, NULL, 'f'},
@@ -1023,17 +1014,25 @@ static int cmd_iflow(const struct command *cmd, int argc, char *const *argv)
 			cfg.iflow.frer.pop = !!atoi(optarg);
 			break;
 		case 'e':
-			cfg.ifindex1 = if_nametoindex(optarg);
-			if (cfg.ifindex1 == 0) {
-				fprintf(stderr, "%s: %s!\n", optarg, strerror(errno));
-				return 1;
+			if (optarg[0] == '-') {
+				cfg.ifindex1 = 0; /* Remove device */
+			} else {
+				cfg.ifindex1 = if_nametoindex(optarg);
+				if (cfg.ifindex1 == 0) {
+					fprintf(stderr, "%s: %s!\n", optarg, strerror(errno));
+					return 1;
+				}
 			}
 			break;
 		case 'f':
-			cfg.ifindex2 = if_nametoindex(optarg);
-			if (cfg.ifindex2 == 0) {
-				fprintf(stderr, "%s: %s!\n", optarg, strerror(errno));
-				return 1;
+			if (optarg[0] == '-') {
+				cfg.ifindex2 = 0; /* Remove device */
+			} else {
+				cfg.ifindex2 = if_nametoindex(optarg);
+				if (cfg.ifindex2 == 0) {
+					fprintf(stderr, "%s: %s!\n", optarg, strerror(errno));
+					return 1;
+				}
 			}
 			break;
 		case 'h':
@@ -1057,7 +1056,7 @@ static int cmd_iflow(const struct command *cmd, int argc, char *const *argv)
 			if2[0] = '-';
 		printf("%-14s %8d\n", "ms_enable:", cfg.iflow.frer.ms_enable);
 		printf("%-14s %8d\n", "ms_id:", cfg.iflow.frer.ms_id);
-		printf("%-14s %8d\n", "generate:", cfg.iflow.frer.generation);
+		printf("%-14s %8d\n", "generation:", cfg.iflow.frer.generation);
 		printf("%-14s %8d\n", "pop:", cfg.iflow.frer.pop);
 		printf("%-14s %8s\n", "dev1:", if1 ? if1 : "-");
 		printf("%-14s %8s\n", "dev2:", if2 ? if2 : "-");
