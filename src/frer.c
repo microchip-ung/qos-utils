@@ -314,7 +314,7 @@ static int cmd_cs(const struct command *cmd, int argc, char *const *argv)
 			do_cnt = 1;
 			break;
 		case 'g':
-			do_cnt = 1;
+			do_clr = 1;
 			break;
 		case 'h':
 		case '?':
