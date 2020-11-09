@@ -331,13 +331,13 @@ static int cmd_cs(const struct command *cmd, int argc, char *const *argv)
 	if (do_cnt) {
 		rc = lan966x_frer_genl_cs_cnt_get(cs_id, &cnt);
 		if (rc == 0) {
-			printf("%-18s: %16ld\n", "OutOfOrderPackets", cnt.out_of_order_packets);
-			printf("%-18s: %16ld\n", "RoguePackets", cnt.rogue_packets);
-			printf("%-18s: %16ld\n", "PassedPackets", cnt.passed_packets);
-			printf("%-18s: %16ld\n", "DiscardedPackets", cnt.discarded_packets);
-			printf("%-18s: %16ld\n", "LostPackets", cnt.lost_packets);
-			printf("%-18s: %16ld\n", "TaglessPackets", cnt.tagless_packets);
-			printf("%-18s: %16ld\n", "Resets", cnt.resets);
+			printf("%-18s: %16" PRIu64 "\n", "OutOfOrderPackets", cnt.out_of_order_packets);
+			printf("%-18s: %16" PRIu64 "\n", "RoguePackets", cnt.rogue_packets);
+			printf("%-18s: %16" PRIu64 "\n", "PassedPackets", cnt.passed_packets);
+			printf("%-18s: %16" PRIu64 "\n", "DiscardedPackets", cnt.discarded_packets);
+			printf("%-18s: %16" PRIu64 "\n", "LostPackets", cnt.lost_packets);
+			printf("%-18s: %16" PRIu64 "\n", "TaglessPackets", cnt.tagless_packets);
+			printf("%-18s: %16" PRIu64 "\n", "Resets", cnt.resets);
 		}
 		return rc;
 	}
@@ -348,8 +348,8 @@ static int cmd_cs(const struct command *cmd, int argc, char *const *argv)
 	if (memcmp(&tmp, &cfg, sizeof(cfg)) == 0) {
 		printf("%-14s %8d\n", "enable:", cfg.enable);
 		printf("%-14s %8d\n", "alg:", cfg.alg);
-		printf("%-14s %8d\n", "hlen:", cfg.hlen);
-		printf("%-14s %8d\n", "reset_time:", cfg.reset_time);
+		printf("%-14s %8u\n", "hlen:", cfg.hlen);
+		printf("%-14s %8u\n", "reset_time:", cfg.reset_time);
 		printf("%-14s %8d\n", "take_no_seq:", cfg.take_no_seq);
 		return 0;
 	}
@@ -830,13 +830,13 @@ static int cmd_ms(const struct command *cmd, int argc, char *const *argv)
 	if (do_cnt) {
 		rc = lan966x_frer_genl_ms_cnt_get(ifindex, ms_id, &cnt);
 		if (rc == 0) {
-			printf("%-18s: %16ld\n", "OutOfOrderPackets", cnt.out_of_order_packets);
-			printf("%-18s: %16ld\n", "RoguePackets", cnt.rogue_packets);
-			printf("%-18s: %16ld\n", "PassedPackets", cnt.passed_packets);
-			printf("%-18s: %16ld\n", "DiscardedPackets", cnt.discarded_packets);
-			printf("%-18s: %16ld\n", "LostPackets", cnt.lost_packets);
-			printf("%-18s: %16ld\n", "TaglessPackets", cnt.tagless_packets);
-			printf("%-18s: %16ld\n", "Resets", cnt.resets);
+			printf("%-18s: %16" PRIu64 "\n", "OutOfOrderPackets", cnt.out_of_order_packets);
+			printf("%-18s: %16" PRIu64 "\n", "RoguePackets", cnt.rogue_packets);
+			printf("%-18s: %16" PRIu64 "\n", "PassedPackets", cnt.passed_packets);
+			printf("%-18s: %16" PRIu64 "\n", "DiscardedPackets", cnt.discarded_packets);
+			printf("%-18s: %16" PRIu64 "\n", "LostPackets", cnt.lost_packets);
+			printf("%-18s: %16" PRIu64 "\n", "TaglessPackets", cnt.tagless_packets);
+			printf("%-18s: %16" PRIu64 "\n", "Resets", cnt.resets);
 		}
 		return rc;
 	}
@@ -847,8 +847,8 @@ static int cmd_ms(const struct command *cmd, int argc, char *const *argv)
 	if (memcmp(&tmp, &cfg, sizeof(cfg)) == 0) {
 		printf("%-14s %8d\n", "enable:", cfg.enable);
 		printf("%-14s %8d\n", "alg:", cfg.alg);
-		printf("%-14s %8d\n", "hlen:", cfg.hlen);
-		printf("%-14s %8d\n", "reset_time:", cfg.reset_time);
+		printf("%-14s %8u\n", "hlen:", cfg.hlen);
+		printf("%-14s %8u\n", "reset_time:", cfg.reset_time);
 		printf("%-14s %8d\n", "take_no_seq:", cfg.take_no_seq);
 		printf("%-14s %8d\n", "cs_id:", cfg.cs_id);
 		return 0;
@@ -1067,7 +1067,7 @@ static int cmd_iflow(const struct command *cmd, int argc, char *const *argv)
 		if (!if_indextoname(cfg.ifindex2, if2))
 			if2[0] = '-';
 		printf("%-14s %8d\n", "ms_enable:", cfg.iflow.frer.ms_enable);
-		printf("%-14s %8d\n", "ms_id:", cfg.iflow.frer.ms_id);
+		printf("%-14s %8u\n", "ms_id:", cfg.iflow.frer.ms_id);
 		printf("%-14s %8d\n", "generation:", cfg.iflow.frer.generation);
 		printf("%-14s %8d\n", "pop:", cfg.iflow.frer.pop);
 		printf("%-14s %8s\n", "dev1:", if1 ? if1 : "-");

@@ -241,10 +241,10 @@ void lan966x_status_get(uint32_t index)
 	}
 
 	printf("dev: %s\n", if_indextoname(index, ifname));
-	printf("hold_advance: %d\n", status.hold_advance);
-	printf("release_advance: %d\n", status.release_advance);
-	printf("preemption_active: %d\n", status.preemption_active);
-	printf("hold_request: %d\n", status.hold_request);
+	printf("hold_advance: %u\n", status.hold_advance);
+	printf("release_advance: %u\n", status.release_advance);
+	printf("preemption_active: %u\n", status.preemption_active);
+	printf("hold_request: %u\n", status.hold_request);
 	printf("status_verify: %s\n", get_status_verify(status.status_verify));
 
 nla_put_failure:
@@ -316,10 +316,10 @@ int main(int argc, char *argv[])
 
 	if (memcmp(&tmp, &config, sizeof(config)) == 0) {
 		printf("admin_status: 0x%x\n", config.admin_status);
-		printf("enable_tx: %d\n", config.enable_tx);
-		printf("verify_disable_tx: %d\n", config.verify_disable_tx);
-		printf("verify_time: %d\n", config.verify_time);
-		printf("add_frag_size: %d\n", config.add_frag_size);
+		printf("enable_tx: %u\n", config.enable_tx);
+		printf("verify_disable_tx: %u\n", config.verify_disable_tx);
+		printf("verify_time: %u\n", config.verify_time);
+		printf("add_frag_size: %u\n", config.add_frag_size);
 		return 0;
 	}
 

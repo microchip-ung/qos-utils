@@ -8,6 +8,7 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+#include <inttypes.h>
 #include <netlink/genl/genl.h>
 #include <netlink/genl/ctrl.h>
 

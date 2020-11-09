@@ -287,12 +287,12 @@ static void lan966x_psfp_sf_status_get(uint32_t sfi_id)
 		goto nla_put_failure;
 	}
 
-	printf("matching_frames_count: %ld\n", counters.matching_frames_count);
-	printf("passing_frames_count: %ld\n", counters.passing_frames_count);
-	printf("not_passing_frames_count: %ld\n", counters.not_passing_frames_count);
-	printf("passing_sdu_count: %ld\n", counters.passing_sdu_count);
-	printf("not_passing_sdu_count: %ld\n", counters.not_passing_sdu_count);
-	printf("red_frames_count: %ld\n", counters.red_frames_count);
+	printf("matching_frames_count: %" PRIu64 "\n", counters.matching_frames_count);
+	printf("passing_frames_count: %" PRIu64 "\n", counters.passing_frames_count);
+	printf("not_passing_frames_count: %" PRIu64 "\n", counters.not_passing_frames_count);
+	printf("passing_sdu_count: %" PRIu64 "\n", counters.passing_sdu_count);
+	printf("not_passing_sdu_count: %" PRIu64 "\n", counters.not_passing_sdu_count);
+	printf("red_frames_count: %" PRIu64 "\n", counters.red_frames_count);
 
 nla_put_failure:
 	nlmsg_free(msg);
@@ -360,7 +360,7 @@ static int cmd_sf(int argc, char *const *argv)
 
 	if (memcmp(&tmp, &config, sizeof(config)) == 0) {
 		printf("enable: %d\n", config.enable);
-		printf("max_sdu: %d\n", config.max_sdu);
+		printf("max_sdu: %u\n", config.max_sdu);
 		printf("block_oversize_enable: %d\n", config.block_oversize_enable);
 		printf("block_oversize: %d\n", config.block_oversize);
 		return 0;
@@ -518,14 +518,14 @@ static void lan966x_psfp_sg_status_get(uint32_t sgi_id)
 
 	printf("gate_open: %d\n", status.gate_open);
 	printf("ipv_enable: %d\n", status.ipv_enable);
-	printf("ipv: %d\n", status.ipv);
-	printf("config_change_time: %ld\n", status.config_change_time);
-	printf("current_time: %ld\n", status.current_time);
+	printf("ipv: %u\n", status.ipv);
+	printf("config_change_time: %" PRIu64 "\n", status.config_change_time);
+	printf("current_time: %" PRIu64 "\n", status.current_time);
 	printf("config_pending: %d\n", status.config_pending);
-	printf("base_time: %ld\n", status.oper.base_time);
-	printf("cycle_time: %d\n", status.oper.cycle_time);
-	printf("cycle_time_ext: %d\n", status.oper.cycle_time_ext);
-	printf("gcl_length: %d\n", status.oper.gcl_length);
+	printf("base_time: %" PRIu64 "\n", status.oper.base_time);
+	printf("cycle_time: %u\n", status.oper.cycle_time);
+	printf("cycle_time_ext: %u\n", status.oper.cycle_time_ext);
+	printf("gcl_length: %u\n", status.oper.gcl_length);
 
 nla_put_failure:
 	nlmsg_free(msg);
@@ -640,16 +640,16 @@ static int cmd_sg(int argc, char *const *argv)
 		printf("enable: %d\n", config.enable);
 		printf("gate_open: %d\n", config.gate_open);
 		printf("ipv_enable: %d\n", config.ipv_enable);
-		printf("ipv: %d\n", config.ipv);
+		printf("ipv: %u\n", config.ipv);
 		printf("close_invalid_rx_enable: %d\n", config.close_invalid_rx_enable);
 		printf("close_invalid_rx: %d\n", config.close_invalid_rx);
 		printf("close_octets_exceeded_enable: %d\n", config.close_octets_exceeded_enable);
 		printf("close_octets_exceeded: %d\n", config.close_octets_exceeded);
 		printf("config_change: %d\n", config.config_change);
-		printf("base_time: %ld\n", config.admin.base_time);
-		printf("cycle_time: %d\n", config.admin.cycle_time);
-		printf("cycle_time_ext: %d\n", config.admin.cycle_time_ext);
-		printf("gcl_length: %d\n", config.admin.gcl_length);
+		printf("base_time: %" PRIu64 "\n", config.admin.base_time);
+		printf("cycle_time: %u\n", config.admin.cycle_time);
+		printf("cycle_time_ext: %u\n", config.admin.cycle_time_ext);
+		printf("gcl_length: %u\n", config.admin.gcl_length);
 		return 0;
 	}
 
@@ -808,9 +808,9 @@ static void lan966x_psfp_gce_status_get(uint32_t sgi_id, uint32_t gce_id)
 
 	printf("gate_open: %d\n", status.gate_open);
 	printf("ipv_enable: %d\n", status.ipv_enable);
-	printf("ipv: %d\n", status.ipv);
-	printf("time_interval: %d\n", status.time_interval);
-	printf("octet_max: %d\n", status.octet_max);
+	printf("ipv: %u\n", status.ipv);
+	printf("time_interval: %u\n", status.time_interval);
+	printf("octet_max: %u\n", status.octet_max);
 
 nla_put_failure:
 	nlmsg_free(msg);
@@ -890,9 +890,9 @@ static int cmd_gce(int argc, char *const *argv)
 	if (memcmp(&tmp, &config, sizeof(config)) == 0) {
 		printf("gate_open: %d\n", config.gate_open);
 		printf("ipv_enable: %d\n", config.ipv_enable);
-		printf("ipv: %d\n", config.ipv);
-		printf("time_interval: %d\n", config.time_interval);
-		printf("octet_max: %d\n", config.octet_max);
+		printf("ipv: %u\n", config.ipv);
+		printf("time_interval: %u\n", config.time_interval);
+		printf("octet_max: %u\n", config.octet_max);
 		return 0;
 	}
 
@@ -1069,10 +1069,10 @@ static int cmd_fm(int argc, char *const *argv)
 
 	if (memcmp(&tmp, &config, sizeof(config)) == 0) {
 		printf("enable: %d\n", config.enable);
-		printf("cir: %d\n", config.cir);
-		printf("cbs: %d\n", config.cbs);
-		printf("eir: %d\n", config.eir);
-		printf("ebs: %d\n", config.ebs);
+		printf("cir: %u\n", config.cir);
+		printf("cbs: %u\n", config.cbs);
+		printf("eir: %u\n", config.eir);
+		printf("ebs: %u\n", config.ebs);
 		printf("cf: %d\n", config.cf);
 		printf("drop_on_yellow: %d\n", config.drop_on_yellow);
 		printf("mark_red_enable: %d\n", config.mark_red_enable);
