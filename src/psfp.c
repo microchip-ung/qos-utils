@@ -614,7 +614,7 @@ static int cmd_sg(int argc, char *const *argv)
 			config.config_change = atoi(optarg);
 			break;
 		case 'j':
-			config.admin.base_time = atol(optarg);
+			config.admin.base_time = atoll(optarg);
 			break;
 		case 'k':
 			config.admin.cycle_time = atoi(optarg);
