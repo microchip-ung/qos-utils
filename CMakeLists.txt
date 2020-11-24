@@ -24,3 +24,7 @@ add_executable(frer src/frer.c src/common.c)
 target_link_libraries(frer ${LIBNL_LIBRARIES})
 install(TARGETS frer DESTINATION bin)
 
+add_executable(qos src/qos.c src/common.c)
+target_link_libraries(qos ${LIBNL_LIBRARIES})
+install(TARGETS qos DESTINATION bin)
+
