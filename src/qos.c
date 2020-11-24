@@ -37,6 +37,7 @@ static struct nla_policy lan966x_qos_genl_policy[LAN966X_QOS_ATTR_END] = {
 	[LAN966X_QOS_ATTR_NONE] = { .type = NLA_UNSPEC },
 	[LAN966X_QOS_ATTR_DEV] = { .type = NLA_U32 },
 	[LAN966X_QOS_ATTR_PORT_CFG] = { .type = NLA_BINARY },
+	[LAN966X_QOS_ATTR_DSCP] = { .type = NLA_U32 },
 	[LAN966X_QOS_ATTR_DSCP_PRIO_DPL] = { .type = NLA_BINARY },
 };
 
@@ -234,7 +235,7 @@ static int lan966x_qos_genl_dscp_prio_dpl_get_cb(struct nl_msg *msg, void *arg)
 {
 	struct genlmsghdr *hdr = nlmsg_data(nlmsg_hdr(msg));
 	struct nlattr *attrs[LAN966X_QOS_ATTR_END];
-	struct lan966x_qos_port_cfg *cfg = arg;
+	struct lan966x_qos_dscp_prio_dpl *cfg = arg;
 
 	if (nla_parse(attrs, LAN966X_QOS_ATTR_MAX, genlmsg_attrdata(hdr, 0),
 		      genlmsg_attrlen(hdr, 0), lan966x_qos_genl_policy)) {
@@ -266,7 +267,7 @@ static int lan966x_qos_genl_dscp_prio_dpl_get(u32 dscp,
 				LAN966X_QOS_GENL_DSCP_PRIO_DPL_GET, 1, &sk, &msg);
 
 	nl_socket_modify_cb(sk, NL_CB_VALID, NL_CB_CUSTOM,
-			    lan966x_qos_genl_port_cfg_get_cb, &tmp);
+			    lan966x_qos_genl_dscp_prio_dpl_get_cb, &tmp);
 
 	NLA_PUT_U32(msg, LAN966X_QOS_ATTR_DSCP, dscp);
 
