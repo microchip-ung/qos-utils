@@ -3,11 +3,12 @@
  * Copyright (c) 2020 Microchip Corporation
  */
 
-#include "qos.h"
 #include "common.h"
 #include <getopt.h>
 #include <errno.h>
 #include <net/if.h>
+#include "kernel_types.h"
+#include "lan966x_ui_qos.h"
 
 struct command
 {
@@ -20,32 +21,12 @@ struct command
 
 static void command_help(const struct command *cmd);
 
-enum lan966x_qos_attr {
-	LAN966X_QOS_ATTR_NONE,
-	LAN966X_QOS_ATTR_DEV,
-	LAN966X_QOS_ATTR_PORT_CFG,
-	LAN966X_QOS_ATTR_DSCP,
-	LAN966X_QOS_ATTR_DSCP_PRIO_DPL,
-
-	/* This must be the last entry */
-	LAN966X_QOS_ATTR_END,
-};
-
-#define LAN966X_QOS_ATTR_MAX (LAN966X_QOS_ATTR_END - 1)
-
 static struct nla_policy lan966x_qos_genl_policy[LAN966X_QOS_ATTR_END] = {
 	[LAN966X_QOS_ATTR_NONE] = { .type = NLA_UNSPEC },
 	[LAN966X_QOS_ATTR_DEV] = { .type = NLA_U32 },
 	[LAN966X_QOS_ATTR_PORT_CFG] = { .type = NLA_BINARY },
 	[LAN966X_QOS_ATTR_DSCP] = { .type = NLA_U32 },
 	[LAN966X_QOS_ATTR_DSCP_PRIO_DPL] = { .type = NLA_BINARY },
-};
-
-enum lan966x_qos_genl {
-	LAN966X_QOS_GENL_PORT_CFG_SET,
-	LAN966X_QOS_GENL_PORT_CFG_GET,
-	LAN966X_QOS_GENL_DSCP_PRIO_DPL_SET,
-	LAN966X_QOS_GENL_DSCP_PRIO_DPL_GET,
 };
 
 static char *i_tag_map_help(void)
@@ -106,7 +87,7 @@ static char *e_mode_help(void)
 }
 
 static int lan966x_qos_genl_port_cfg_set(u32 ifindex,
-					 const struct lan966x_qos_port_cfg *cfg)
+					 const struct lan966x_qos_port_conf *cfg)
 {
 	RETURN_IF_PC;
 	struct nl_sock *sk;
@@ -141,7 +122,7 @@ static int lan966x_qos_genl_port_cfg_get_cb(struct nl_msg *msg, void *arg)
 {
 	struct genlmsghdr *hdr = nlmsg_data(nlmsg_hdr(msg));
 	struct nlattr *attrs[LAN966X_QOS_ATTR_END];
-	struct lan966x_qos_port_cfg *cfg = arg;
+	struct lan966x_qos_port_conf *cfg = arg;
 
 	if (nla_parse(attrs, LAN966X_QOS_ATTR_MAX, genlmsg_attrdata(hdr, 0),
 		      genlmsg_attrlen(hdr, 0), lan966x_qos_genl_policy)) {
@@ -155,16 +136,16 @@ static int lan966x_qos_genl_port_cfg_get_cb(struct nl_msg *msg, void *arg)
 	}
 
 	nla_memcpy(cfg, attrs[LAN966X_QOS_ATTR_PORT_CFG],
-		   sizeof(struct lan966x_qos_port_cfg));
+		   sizeof(struct lan966x_qos_port_conf));
 
 	return NL_OK;
 }
 
 static int lan966x_qos_genl_port_cfg_get(u32 ifindex,
-					 struct lan966x_qos_port_cfg *cfg)
+					 struct lan966x_qos_port_conf *cfg)
 {
 	RETURN_IF_PC;
-	struct lan966x_qos_port_cfg tmp;
+	struct lan966x_qos_port_conf tmp;
 	struct nl_sock *sk;
 	struct nl_msg *msg;
 	int rc = 0;
@@ -309,8 +290,8 @@ static int cmd_i_tag_map(const struct command *cmd, int argc, char *const *argv)
 		{"help", no_argument, NULL, 'h'},
 		{NULL, 0, NULL, 0}
 	};
-	struct lan966x_qos_port_cfg cfg = {};
-	struct lan966x_qos_port_cfg tmp;
+	struct lan966x_qos_port_conf cfg = {};
+	struct lan966x_qos_port_conf tmp;
 	int do_help = 0;
 	u32 ifindex = 0;
 	int ch, len, i;
@@ -451,8 +432,8 @@ static int cmd_i_def(const struct command *cmd, int argc, char *const *argv)
 		{"help", no_argument, NULL, 'h'},
 		{NULL, 0, NULL, 0}
 	};
-	struct lan966x_qos_port_cfg cfg = {};
-	struct lan966x_qos_port_cfg tmp;
+	struct lan966x_qos_port_conf cfg = {};
+	struct lan966x_qos_port_conf tmp;
 	int do_help = 0;
 	u32 ifindex = 0;
 	int ch;
@@ -513,8 +494,8 @@ static int cmd_i_mode(const struct command *cmd, int argc, char *const *argv)
 		{"help", no_argument, NULL, 'h'},
 		{NULL, 0, NULL, 0}
 	};
-	struct lan966x_qos_port_cfg cfg = {};
-	struct lan966x_qos_port_cfg tmp;
+	struct lan966x_qos_port_conf cfg = {};
+	struct lan966x_qos_port_conf tmp;
 	int do_help = 0;
 	u32 ifindex = 0;
 	int ch;
@@ -576,8 +557,8 @@ static int cmd_e_tag_map(const struct command *cmd, int argc, char *const *argv)
 		{"help", no_argument, NULL, 'h'},
 		{NULL, 0, NULL, 0}
 	};
-	struct lan966x_qos_port_cfg cfg = {};
-	struct lan966x_qos_port_cfg tmp;
+	struct lan966x_qos_port_conf cfg = {};
+	struct lan966x_qos_port_conf tmp;
 	int do_help = 0;
 	u32 ifindex = 0;
 	int ch, len, i;
@@ -660,8 +641,8 @@ static int cmd_e_def(const struct command *cmd, int argc, char *const *argv)
 		{"help", no_argument, NULL, 'h'},
 		{NULL, 0, NULL, 0}
 	};
-	struct lan966x_qos_port_cfg cfg = {};
-	struct lan966x_qos_port_cfg tmp;
+	struct lan966x_qos_port_conf cfg = {};
+	struct lan966x_qos_port_conf tmp;
 	int do_help = 0;
 	u32 ifindex = 0;
 	int ch;
@@ -717,8 +698,8 @@ static int cmd_e_mode(const struct command *cmd, int argc, char *const *argv)
 		{"help", no_argument, NULL, 'h'},
 		{NULL, 0, NULL, 0}
 	};
-	struct lan966x_qos_port_cfg cfg = {};
-	struct lan966x_qos_port_cfg tmp;
+	struct lan966x_qos_port_conf cfg = {};
+	struct lan966x_qos_port_conf tmp;
 	int do_help = 0;
 	u32 ifindex = 0;
 	int ch;

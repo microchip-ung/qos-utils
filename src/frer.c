@@ -3,11 +3,12 @@
  * Copyright (c) 2020 Microchip Corporation
  */
 
-#include "frer.h"
 #include "common.h"
 #include <getopt.h>
 #include <errno.h>
 #include <net/if.h>
+#include "kernel_types.h"
+#include "lan966x_ui_qos.h"
 
 struct command
 {
@@ -20,22 +21,6 @@ struct command
 
 static void command_help(const struct command *cmd);
 
-enum lan966x_frer_attr {
-	LAN966X_FRER_ATTR_NONE,
-	LAN966X_FRER_ATTR_ID,
-	LAN966X_FRER_ATTR_DEV1,
-	LAN966X_FRER_ATTR_DEV2,
-	LAN966X_FRER_ATTR_STREAM_CFG,
-	LAN966X_FRER_ATTR_STREAM_CNT,
-	LAN966X_FRER_ATTR_IFLOW_CFG,
-	LAN966X_FRER_ATTR_VLAN_CFG,
-
-	/* This must be the last entry */
-	LAN966X_FRER_ATTR_END,
-};
-
-#define LAN966X_FRER_ATTR_MAX (LAN966X_FRER_ATTR_END - 1)
-
 static struct nla_policy lan966x_frer_genl_policy[LAN966X_FRER_ATTR_END] = {
 	[LAN966X_FRER_ATTR_NONE] = { .type = NLA_UNSPEC },
 	[LAN966X_FRER_ATTR_ID] = { .type = NLA_U32 },
@@ -45,23 +30,6 @@ static struct nla_policy lan966x_frer_genl_policy[LAN966X_FRER_ATTR_END] = {
 	[LAN966X_FRER_ATTR_STREAM_CNT] = { .type = NLA_BINARY },
 	[LAN966X_FRER_ATTR_IFLOW_CFG] = { .type = NLA_BINARY },
 	[LAN966X_FRER_ATTR_VLAN_CFG] = { .type = NLA_BINARY },
-};
-
-enum lan966x_frer_genl {
-	LAN966X_FRER_GENL_CS_CFG_SET,
-	LAN966X_FRER_GENL_CS_CFG_GET,
-	LAN966X_FRER_GENL_CS_CNT_GET,
-	LAN966X_FRER_GENL_CS_CNT_CLR,
-	LAN966X_FRER_GENL_MS_ALLOC,
-	LAN966X_FRER_GENL_MS_FREE,
-	LAN966X_FRER_GENL_MS_CFG_SET,
-	LAN966X_FRER_GENL_MS_CFG_GET,
-	LAN966X_FRER_GENL_MS_CNT_GET,
-	LAN966X_FRER_GENL_MS_CNT_CLR,
-	LAN966X_FRER_GENL_IFLOW_CFG_SET,
-	LAN966X_FRER_GENL_IFLOW_CFG_GET,
-	LAN966X_FRER_GENL_VLAN_CFG_SET,
-	LAN966X_FRER_GENL_VLAN_CFG_GET,
 };
 
 /* cmd_cs */
