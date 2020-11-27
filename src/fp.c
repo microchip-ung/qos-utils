@@ -6,56 +6,14 @@
 #include "common.h"
 #include <getopt.h>
 #include <net/if.h>
-
-enum lan966x_qos_fp_port_attr {
-	LAN966X_QOS_FP_PORT_ATTR_NONE,
-	LAN966X_QOS_FP_PORT_ATTR_CONF,
-	LAN966X_QOS_FP_PORT_ATTR_STATUS,
-	LAN966X_QOS_FP_PORT_ATTR_IDX,
-
-	/* This must be the last entry */
-	LAN966X_QOS_FP_PORT_ATTR_END,
-};
-
-#define LAN966X_QOS_FP_PORT_ATTR_MAX		LAN966X_QOS_FP_PORT_ATTR_END - 1
-
-enum lan966x_qos_fp_port_genl {
-	LAN966X_QOS_FP_PORT_GENL_CONF_SET,
-	LAN966X_QOS_FP_PORT_GENL_CONF_GET,
-	LAN966X_QOS_FP_PORT_GENL_STATUS_GET,
-};
+#include "kernel_types.h"
+#include "lan966x_ui_qos.h"
 
 static struct nla_policy lan966x_qos_fp_port_genl_policy[LAN966X_QOS_FP_PORT_ATTR_END] = {
 	[LAN966X_QOS_FP_PORT_ATTR_NONE] = { .type = NLA_UNSPEC },
 	[LAN966X_QOS_FP_PORT_ATTR_CONF] = { .type = NLA_BINARY },
 	[LAN966X_QOS_FP_PORT_ATTR_STATUS] = { .type = NLA_BINARY },
 	[LAN966X_QOS_FP_PORT_ATTR_IDX] = { .type = NLA_U32 },
-};
-
-struct lan966x_qos_fp_port_conf {
-	uint8_t  admin_status;      // IEEE802.1Qbu: framePreemptionStatusTable
-	uint8_t  enable_tx;         // IEEE802.3br: aMACMergeEnableTx
-	uint8_t  verify_disable_tx; // IEEE802.3br: aMACMergeVerifyDisableTx
-	uint8_t  verify_time;       // IEEE802.3br: aMACMergeVerifyTime [msec]
-	uint8_t  add_frag_size;     // IEEE802.3br: aMACMergeAddFragSize
-};
-
-enum lan966x_mm_status_verify {
-	LAN966X_MM_STATUS_VERIFY_INITIAL,   /**< INIT_VERIFICATION */
-	LAN966X_MM_STATUS_VERIFY_IDLE,      /**< VERIFICATION_IDLE */
-	LAN966X_MM_STATUS_VERIFY_SEND,      /**< SEND_VERIFY */
-	LAN966X_MM_STATUS_VERIFY_WAIT,      /**< WAIT_FOR_RESPONSE */
-	LAN966X_MM_STATUS_VERIFY_SUCCEEDED, /**< VERIFIED */
-	LAN966X_MM_STATUS_VERIFY_FAILED,    /**< VERIFY_FAIL */
-	LAN966X_MM_STATUS_VERIFY_DISABLED   /**< Verification process is disabled */
-};
-
-struct lan966x_qos_fp_port_status {
-	uint32_t hold_advance;      // TBD: IEEE802.1Qbu: holdAdvance [nsec]
-	uint32_t release_advance;   // TBD: IEEE802.1Qbu: releaseAdvance [nsec]
-	uint8_t preemption_active; // IEEE802.1Qbu: preemptionActive, IEEE802.3br: aMACMergeStatusTx
-	uint8_t hold_request;      // TBD: IEEE802.1Qbu: holdRequest
-	enum lan966x_mm_status_verify status_verify;     // IEEE802.3br: aMACMergeStatusVerify
 };
 
 /* From here here there can be changes */

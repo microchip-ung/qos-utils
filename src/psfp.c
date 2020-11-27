@@ -5,41 +5,17 @@
 
 #include "common.h"
 #include <getopt.h>
+#include "kernel_types.h"
+#include "lan966x_ui_qos.h"
 
-#define LAN966X_PSFP_NETLINK	"lan966x_psfp_nl"
-
-enum lan966x_psfp_attr {
-	LAN966X_PSFP_ATTR_NONE,
-	LAN966X_PSFP_SF_ATTR_CONF,
-	LAN966X_PSFP_SF_ATTR_STATUS,
-	LAN966X_PSFP_SF_ATTR_SFI,
-	LAN966X_PSFP_GCE_ATTR_CONF,
-	LAN966X_PSFP_GCE_ATTR_SGI,
-	LAN966X_PSFP_GCE_ATTR_GCI,
-	LAN966X_PSFP_SG_ATTR_CONF,
-	LAN966X_PSFP_SG_ATTR_STATUS,
-	LAN966X_PSFP_SG_ATTR_SGI,
-	LAN966X_PSFP_FM_ATTR_CONF,
-	LAN966X_PSFP_FM_ATTR_FMI,
-
-	/* This must be the last entry */
-	LAN966X_PSFP_ATTR_END,
-};
-
-#define LAN966X_PSFP_ATTR_MAX		LAN966X_PSFP_ATTR_END - 1
-
-enum lan966x_psfp_genl {
-	LAN966X_PSFP_SF_GENL_CONF_SET,
-	LAN966X_PSFP_SF_GENL_CONF_GET,
-	LAN966X_PSFP_SF_GENL_STATUS_GET,
-	LAN966X_PSFP_GCE_GENL_CONF_SET,
-	LAN966X_PSFP_GCE_GENL_CONF_GET,
-	LAN966X_PSFP_GCE_GENL_STATUS_GET,
-	LAN966X_PSFP_SG_GENL_CONF_SET,
-	LAN966X_PSFP_SG_GENL_CONF_GET,
-	LAN966X_PSFP_SG_GENL_STATUS_GET,
-	LAN966X_PSFP_FM_GENL_CONF_SET,
-	LAN966X_PSFP_FM_GENL_CONF_GET,
+/* commands */
+struct command
+{
+	int nargs;
+	const char *name;
+	int (*func) (int argc, char *const *argv);
+	const char *format;
+	char *(*help)(void);
 };
 
 static struct nla_policy lan966x_psfp_genl_policy[LAN966X_PSFP_ATTR_END] = {
@@ -55,91 +31,6 @@ static struct nla_policy lan966x_psfp_genl_policy[LAN966X_PSFP_ATTR_END] = {
 	[LAN966X_PSFP_SG_ATTR_SGI] = { .type = NLA_U32 },
 	[LAN966X_PSFP_FM_ATTR_CONF] = { .type = NLA_BINARY },
 	[LAN966X_PSFP_FM_ATTR_FMI] = { .type = NLA_U32 },
-};
-
-/* PSFP Stream Filter configuration */
-struct lan966x_psfp_sf_conf {
-	bool enable;     /* Enable filter */
-	uint16_t max_sdu;     /* Maximum SDU size (zero disables SDU check) */
-	bool block_oversize_enable; /* StreamBlockedDueToOversizeFrameEnable */
-	bool block_oversize;        /* StreamBlockedDueToOversizeFrame */
-};
-
-/* PSFP Stream Filter counters */
-struct lan966x_psfp_sf_counters {
-	uint64_t matching_frames_count;
-	uint64_t passing_frames_count;
-	uint64_t not_passing_frames_count;
-	uint64_t passing_sdu_count;
-	uint64_t not_passing_sdu_count;
-	uint64_t red_frames_count;
-};
-
-/* PSFP Gate Control Entry configuration/status */
-struct lan966x_psfp_gce {
-	bool gate_open;    /* StreamGateState */
-	bool ipv_enable;   /* enable IPV */
-	uint8_t ipv;            /* IPV */
-	uint32_t time_interval; /* TimeInterval (nsec) */
-	uint32_t octet_max;     /* IntervalOctetMax (zero disables check) */
-};
-
-/* PSFP Gate Control List configuration */
-struct lan966x_psfp_gcl_conf {
-	int64_t base_time;  /* PSFPAdminBaseTime/PSFPOperBaseTime */
-	uint32_t cycle_time;     /* PSFPAdminCycleTime/PSFPOperCycleTime */
-	uint32_t cycle_time_ext; /* PSFPAdminCycleTimeExtension/
-			       PSFPOperCycleTimeExtension */
-	uint32_t gcl_length;     /* PSFPAdminControlListLength/
-			       PSFPOperControlListLength */
-};
-
-/* PSFP Stream Gate configuration */
-struct lan966x_psfp_sg_conf{
-	bool enable;               /* PSFPGateEnabled: Enable/disable Gate */
-	bool gate_open;            /* PSFPAdminGateStates: Initial gate state */
-	bool ipv_enable;           /* Enable PSFPAdminIPV */
-	uint8_t ipv;                    /* PSFPAdminIPV */
-	bool close_invalid_rx_enable; /* PSFPGateClosedDueToInvalidRxEnable */
-	bool close_invalid_rx;        /* PSFPGateClosedDueToInvalidRx */
-	bool close_octets_exceeded_enable; /* PSFPGateClosedDueToOctetsExceededEnable */
-	bool close_octets_exceeded; /* PSFPGateClosedDueOctetsExceeded */
-	bool config_change;         /* PSFPConfigChange: Apply config */
-	struct lan966x_psfp_gcl_conf admin; /* PSFPAdmin* */
-};
-
-/* PSFP Stream Gate status */
-struct lan966x_psfp_sg_status {
-	bool gate_open;             /* PSFPOperGateStates */
-	bool ipv_enable;            /* PSFPOperIPV enabled */
-	uint8_t ipv;                /* PSFPOperIPV */
-	int64_t config_change_time; /* PSFPConfigChangeTime */
-	int64_t current_time;       /* PSFPCurrentTime */
-	bool config_pending;        /* PSFPConfigPending */
-	struct lan966x_psfp_gcl_conf oper; /* PSFPOper* */
-};
-
-/* PSFP Flow Meter configuration */
-struct lan966x_psfp_fm_conf {
-	bool enable; /* Enable flow meter */
-	uint32_t cir; /* kbit/s */
-	uint32_t cbs; /* octets */
-	uint32_t eir; /* kbit/s */
-	uint32_t ebs; /* octets */
-	bool cf;
-	bool drop_on_yellow;
-	bool mark_red_enable;
-	bool mark_red;
-};
-
-/* commands */
-struct command
-{
-	int nargs;
-	const char *name;
-	int (*func) (int argc, char *const *argv);
-	const char *format;
-	char *(*help)(void);
 };
 
 static int lan966x_psfp_sf_conf_read(struct nl_msg *msg, void *arg)
