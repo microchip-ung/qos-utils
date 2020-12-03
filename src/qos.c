@@ -38,11 +38,11 @@ static char *i_tag_map_help(void)
 	       "  --help:   Show this help text\n";
 }
 
-static char *i_dhcp_map_help(void)
+static char *i_dscp_map_help(void)
 {
-	return " --enable: Ingress enable of map of DHCP value to (SKB)Priority.\n"
-	       "  --prio:   Ingress map of DHCP value to (SKB)Priority.\n"
-	       "  --dpl:    Ingress map of DHCP value to (color)DPL.\n"
+	return " --enable: Ingress enable of map of DSCP value to (SKB)Priority.\n"
+	       "  --prio:   Ingress map of DSCP value to (SKB)Priority.\n"
+	       "  --dpl:    Ingress map of DSCP value to (color)DPL.\n"
 	       "  --help:   Show this help text\n";
 }
 
@@ -58,7 +58,7 @@ static char *i_def_help(void)
 static char *i_mode_help(void)
 {
 	return " --tag:   Ingress enable of TAG PCP,DEI mapping to (SKB)Priority and DPL\n"
-	       "  --dhcp:  Ingress enable of DHCP mapping to (SKB)Priority and DPL.\n"
+	       "  --dscp:  Ingress enable of DSCP mapping to (SKB)Priority and DPL.\n"
 	       "  --help:  Show this help text\n";
 }
 
@@ -365,7 +365,7 @@ static int cmd_i_tag_map(const struct command *cmd, int argc, char *const *argv)
 	return lan966x_qos_genl_port_cfg_set(ifindex, &cfg);
 }
 
-static int cmd_i_dhcp_map(const struct command *cmd, int argc, char *const *argv)
+static int cmd_i_dscp_map(const struct command *cmd, int argc, char *const *argv)
 {
 	static struct option long_options[] =
 	{
@@ -518,7 +518,7 @@ static int cmd_i_mode(const struct command *cmd, int argc, char *const *argv)
 			cfg.i_mode.tag_map_enable = !!atoi(optarg);
 			break;
 		case 'b':
-			cfg.i_mode.dhcp_map_enable = !!atoi(optarg);
+			cfg.i_mode.dscp_map_enable = !!atoi(optarg);
 			break;
 		case 'h':
 		case '?':
@@ -752,7 +752,7 @@ static int cmd_e_mode(const struct command *cmd, int argc, char *const *argv)
 static const struct command commands[] =
 {
 	{1, "i_tag_map", cmd_i_tag_map, "i_tag_map dev [options]", i_tag_map_help},
-	{1, "i_dhcp_map", cmd_i_dhcp_map, "i_dhcp_map dhcp [options]", i_dhcp_map_help},
+	{1, "i_dscp_map", cmd_i_dscp_map, "i_dscp_map dscp [options]", i_dscp_map_help},
 	{1, "i_def", cmd_i_def, "i_def dev [options]", i_def_help},
 	{1, "i_mode", cmd_i_mode, "i_mode dev [options]", i_mode_help},
 	{1, "e_tag_map", cmd_e_tag_map, "e_tag_map dev [options]", e_tag_map_help},
@@ -773,7 +773,7 @@ static void command_help_all(void)
 
 static void help(void)
 {
-	printf("Usage: qos i_tag_map|i_dhcp_map|i_def|i_mode|e_tag_map|e_def|e_mode [options]\n");
+	printf("Usage: qos i_tag_map|i_dscp_map|i_def|i_mode|e_tag_map|e_def|e_mode [options]\n");
 	printf("options:\n");
 	printf(" --help                    Show this help text\n");
 	printf("commands:\n");

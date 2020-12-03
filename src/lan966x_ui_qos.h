@@ -36,7 +36,7 @@ enum lan966x_qos_genl {
 
 struct lan966x_qos_i_mode {
 	bool tag_map_enable;
-	bool dhcp_map_enable;
+	bool dscp_map_enable;
 };
 
 enum lan966x_qos_e_mode{
