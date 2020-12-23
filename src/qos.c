@@ -276,13 +276,6 @@ nla_put_failure:
 
 static int cmd_i_tag_map(const struct command *cmd, int argc, char *const *argv)
 {
-// " --prio:   Ingress map of TAG PCP,DEI to (SKB)Priority.\n"
-// "           16 values. PCP/DEI(0) and PCP/DEI(1). 0123456701234567 (default)\n"
-// " --dpl:    Ingress map of TAG PCP,DEI to (color)DPL.\n"
-// "           16 values. PCP/DEI(0) and PCP/DEI(1). 0000000011111111 (default)\n"
-	struct lan966x_pcp_dei_prio_dpl i_pcp_dei_prio_dpl_map[PCP_COUNT][DEI_COUNT] =
-		{{{0,0},{0,1}},{{1,0},{1,1}},{{2,0},{2,1}},{{3,0},{3,1}},
-		 {{4,0},{4,1}},{{5,0},{5,1}},{{6,0},{6,1}},{{7,0},{7,1}}};
 	static struct option long_options[] =
 	{
 		{"prio", required_argument, NULL, 'a'},
@@ -318,11 +311,11 @@ static int cmd_i_tag_map(const struct command *cmd, int argc, char *const *argv)
 				return 1;
 			}
 			for (i = 0; i < PCP_COUNT; ++i) {
-				i_pcp_dei_prio_dpl_map[i][0].prio = (u8)optarg[i] - 48;
+				cfg.i_pcp_dei_prio_dpl_map[i][0].prio = (u8)optarg[i] - 48;
 			}
 			if (len == 16) {
 				for (i = 0; i < PCP_COUNT; ++i) {
-					i_pcp_dei_prio_dpl_map[i][1].prio = optarg[i + 8] - 48;
+					cfg.i_pcp_dei_prio_dpl_map[i][1].prio = optarg[i + 8] - 48;
 				}
 			}
 			break;
@@ -334,11 +327,11 @@ static int cmd_i_tag_map(const struct command *cmd, int argc, char *const *argv)
 				return 1;
 			}
 			for (i = 0; i < PCP_COUNT; ++i) {
-				i_pcp_dei_prio_dpl_map[i][0].dpl = (u8)optarg[i] - 48;
+				cfg.i_pcp_dei_prio_dpl_map[i][0].dpl = (u8)optarg[i] - 48;
 			}
 			if (len == 16) {
 				for (i = 0; i < PCP_COUNT; ++i) {
-					i_pcp_dei_prio_dpl_map[i][1].dpl = optarg[i + 8] - 48;
+					cfg.i_pcp_dei_prio_dpl_map[i][1].dpl = optarg[i + 8] - 48;
 				}
 			}
 			break;
@@ -353,12 +346,23 @@ static int cmd_i_tag_map(const struct command *cmd, int argc, char *const *argv)
 		command_help(cmd);
 		return 0;
 	}
-			
-	memcpy(cfg.i_pcp_dei_prio_dpl_map, i_pcp_dei_prio_dpl_map, sizeof(cfg.i_pcp_dei_prio_dpl_map));
 
 	if (memcmp(&tmp, &cfg, sizeof(cfg)) == 0) {
-//		printf("%-14s %8d\n", "flood_disable:", cfg.flood_disable);
-//		printf("%-14s %8d\n", "learn_disable:", cfg.learn_disable);
+		printf("i_tag_map --prio ");
+		for (i = 0; i < PCP_COUNT; ++i) {
+			printf("%d", cfg.i_pcp_dei_prio_dpl_map[i][0].prio);
+		}
+		for (i = 0; i < PCP_COUNT; ++i) {
+			printf("%d", cfg.i_pcp_dei_prio_dpl_map[i][1].prio);
+		}
+		printf(" --dpl ");
+		for (i = 0; i < PCP_COUNT; ++i) {
+			printf("%d", cfg.i_pcp_dei_prio_dpl_map[i][0].dpl);
+		}
+		for (i = 0; i < PCP_COUNT; ++i) {
+			printf("%d", cfg.i_pcp_dei_prio_dpl_map[i][1].dpl);
+		}
+		printf("\n");
 		return 0;
 	}
 
@@ -413,8 +417,7 @@ static int cmd_i_dscp_map(const struct command *cmd, int argc, char *const *argv
 	}
 
 	if (memcmp(&tmp, &cfg, sizeof(cfg)) == 0) {
-//		printf("%-14s %8d\n", "flood_disable:", cfg.flood_disable);
-//		printf("%-14s %8d\n", "learn_disable:", cfg.learn_disable);
+		printf("i_dscp_map --enable %u --prio %u --dpl %u\n", (cfg.trust) ? 1 : 0, cfg.prio, cfg.dpl);
 		return 0;
 	}
 
@@ -477,8 +480,8 @@ static int cmd_i_def(const struct command *cmd, int argc, char *const *argv)
 	}
 
 	if (memcmp(&tmp, &cfg, sizeof(cfg)) == 0) {
-//		printf("%-14s %8d\n", "flood_disable:", cfg.flood_disable);
-//		printf("%-14s %8d\n", "learn_disable:", cfg.learn_disable);
+		printf("i_def --prio %u --pcp %u --dei %u --dpl %u\n",
+		       cfg.i_default_prio, cfg.i_default_pcp, cfg.i_default_dei, cfg.i_default_dpl);
 		return 0;
 	}
 
@@ -533,8 +536,8 @@ static int cmd_i_mode(const struct command *cmd, int argc, char *const *argv)
 	}
 
 	if (memcmp(&tmp, &cfg, sizeof(cfg)) == 0) {
-//		printf("%-14s %8d\n", "flood_disable:", cfg.flood_disable);
-//		printf("%-14s %8d\n", "learn_disable:", cfg.learn_disable);
+		printf("i_mode --tag %u --dscp %u\n",
+		       cfg.i_mode.tag_map_enable, cfg.i_mode.dscp_map_enable);
 		return 0;
 	}
 
@@ -543,13 +546,6 @@ static int cmd_i_mode(const struct command *cmd, int argc, char *const *argv)
 
 static int cmd_e_tag_map(const struct command *cmd, int argc, char *const *argv)
 {
-// " --pcp:  Egress map of (SKB)Priority,(color)DPL to TAG PCP.\n"
-// "         16 values. Prio/DPL(0) and Prio/DPL(1). 0123456701234567 (default)\n"
-// " --dei:  Egress map of (SKB)Priority,(color)DPL to TAG DEI.\n"
-// "         16 values. Prio/DPL(0) and Prio/DPL(1). 0000000011111111 (default)\n"
-	struct lan966x_prio_dpl_pcp_dei e_prio_dpl_pcp_dei_map[PRIO_COUNT][DPL_COUNT] =
-		{{{0,0},{0,1}},{{1,0},{1,1}},{{2,0},{2,1}},{{3,0},{3,1}},
-		 {{4,0},{4,1}},{{5,0},{5,1}},{{6,0},{6,1}},{{7,0},{7,1}}};
 	static struct option long_options[] =
 	{
 		{"pcp", required_argument, NULL, 'a'},
@@ -585,11 +581,11 @@ static int cmd_e_tag_map(const struct command *cmd, int argc, char *const *argv)
 				return 1;
 			}
 			for (i = 0; i < PRIO_COUNT; ++i) {
-				e_prio_dpl_pcp_dei_map[i][0].pcp = (u8)optarg[i] - 48;
+				cfg.e_prio_dpl_pcp_dei_map[i][0].pcp = (u8)optarg[i] - 48;
 			}
 			if (len == 16) {
 				for (i = 0; i < PRIO_COUNT; ++i) {
-					e_prio_dpl_pcp_dei_map[i][1].pcp = optarg[i + 8] - 48;
+					cfg.e_prio_dpl_pcp_dei_map[i][1].pcp = optarg[i + 8] - 48;
 				}
 			}
 			break;
@@ -601,11 +597,11 @@ static int cmd_e_tag_map(const struct command *cmd, int argc, char *const *argv)
 				return 1;
 			}
 			for (i = 0; i < PRIO_COUNT; ++i) {
-				e_prio_dpl_pcp_dei_map[i][0].dei = (u8)optarg[i] - 48;
+				cfg.e_prio_dpl_pcp_dei_map[i][0].dei = (u8)optarg[i] - 48;
 			}
 			if (len == 16) {
 				for (i = 0; i < PRIO_COUNT; ++i) {
-					e_prio_dpl_pcp_dei_map[i][1].dei = optarg[i + 8] - 48;
+					cfg.e_prio_dpl_pcp_dei_map[i][1].dei = optarg[i + 8] - 48;
 				}
 			}
 			break;
@@ -621,11 +617,22 @@ static int cmd_e_tag_map(const struct command *cmd, int argc, char *const *argv)
 		return 0;
 	}
 
-	memcpy(cfg.e_prio_dpl_pcp_dei_map, e_prio_dpl_pcp_dei_map, sizeof(cfg.e_prio_dpl_pcp_dei_map));
-
 	if (memcmp(&tmp, &cfg, sizeof(cfg)) == 0) {
-//		printf("%-14s %8d\n", "flood_disable:", cfg.flood_disable);
-//		printf("%-14s %8d\n", "learn_disable:", cfg.learn_disable);
+		printf("e_tag_map --pcp ");
+		for (i = 0; i < PCP_COUNT; ++i) {
+			printf("%d", cfg.e_prio_dpl_pcp_dei_map[i][0].pcp);
+		}
+		for (i = 0; i < PCP_COUNT; ++i) {
+			printf("%d", cfg.e_prio_dpl_pcp_dei_map[i][1].pcp);
+		}
+		printf(" --dei ");
+		for (i = 0; i < PCP_COUNT; ++i) {
+			printf("%d", cfg.e_prio_dpl_pcp_dei_map[i][0].dei);
+		}
+		for (i = 0; i < PCP_COUNT; ++i) {
+			printf("%d", cfg.e_prio_dpl_pcp_dei_map[i][1].dei);
+		}
+		printf("\n");
 		return 0;
 	}
 
@@ -680,8 +687,8 @@ static int cmd_e_def(const struct command *cmd, int argc, char *const *argv)
 	}
 
 	if (memcmp(&tmp, &cfg, sizeof(cfg)) == 0) {
-//		printf("%-14s %8d\n", "flood_disable:", cfg.flood_disable);
-//		printf("%-14s %8d\n", "learn_disable:", cfg.learn_disable);
+		printf("e_def --pcp %u --dei %u\n",
+		       cfg.e_default_pcp, cfg.e_default_dei);
 		return 0;
 	}
 
@@ -740,8 +747,10 @@ static int cmd_e_mode(const struct command *cmd, int argc, char *const *argv)
 	}
 
 	if (memcmp(&tmp, &cfg, sizeof(cfg)) == 0) {
-//		printf("%-14s %8d\n", "flood_disable:", cfg.flood_disable);
-//		printf("%-14s %8d\n", "learn_disable:", cfg.learn_disable);
+		printf("e_mode --default %u --classified %u --mapped %u\n",
+		       (cfg.e_mode == LAN966X_E_MODE_DEFAULT) ? 1 : 0,
+		       (cfg.e_mode == LAN966X_E_MODE_CLASSIFIED) ? 1 : 0,
+		       (cfg.e_mode == LAN966X_E_MODE_MAPPED) ? 1 : 0);
 		return 0;
 	}
 
