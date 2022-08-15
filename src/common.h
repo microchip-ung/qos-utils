@@ -23,7 +23,7 @@
 /* COUNT_OF() is more type safe than traditional ARRAY_SIZE() */
 #define COUNT_OF(x) ((sizeof(x)/sizeof(0[x])) / ((size_t)(!(sizeof(x) % sizeof(0[x])))))
 
-int lan966x_genl_start(const char *family_name, uint8_t cmd,
+int mchp_genl_start(const char *family_name, uint8_t cmd,
 		       uint8_t version, struct nl_sock **skp,
 		       struct nl_msg **msgp);
 

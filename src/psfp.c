@@ -6,7 +6,7 @@
 #include "common.h"
 #include <getopt.h>
 #include "kernel_types.h"
-#include "lan966x_ui_qos.h"
+#include "mchp_ui_qos.h"
 
 /* commands */
 struct command
@@ -18,59 +18,59 @@ struct command
 	char *(*help)(void);
 };
 
-static struct nla_policy lan966x_psfp_genl_policy[LAN966X_PSFP_ATTR_END] = {
-	[LAN966X_PSFP_ATTR_NONE] = { .type = NLA_UNSPEC },
-	[LAN966X_PSFP_SF_ATTR_CONF] = { .type = NLA_BINARY },
-	[LAN966X_PSFP_SF_ATTR_STATUS] = { .type = NLA_BINARY },
-	[LAN966X_PSFP_SF_ATTR_SFI] = { .type = NLA_U32 },
-	[LAN966X_PSFP_GCE_ATTR_CONF] = { .type = NLA_BINARY },
-	[LAN966X_PSFP_GCE_ATTR_SGI] = { .type = NLA_U32 },
-	[LAN966X_PSFP_GCE_ATTR_GCI] = { .type = NLA_U32 },
-	[LAN966X_PSFP_SG_ATTR_CONF] = { .type = NLA_BINARY },
-	[LAN966X_PSFP_SG_ATTR_STATUS] = { .type = NLA_BINARY },
-	[LAN966X_PSFP_SG_ATTR_SGI] = { .type = NLA_U32 },
-	[LAN966X_PSFP_FM_ATTR_CONF] = { .type = NLA_BINARY },
-	[LAN966X_PSFP_FM_ATTR_FMI] = { .type = NLA_U32 },
+static struct nla_policy mchp_psfp_genl_policy[MCHP_PSFP_ATTR_END] = {
+	[MCHP_PSFP_ATTR_NONE] = { .type = NLA_UNSPEC },
+	[MCHP_PSFP_SF_ATTR_CONF] = { .type = NLA_BINARY },
+	[MCHP_PSFP_SF_ATTR_STATUS] = { .type = NLA_BINARY },
+	[MCHP_PSFP_SF_ATTR_SFI] = { .type = NLA_U32 },
+	[MCHP_PSFP_GCE_ATTR_CONF] = { .type = NLA_BINARY },
+	[MCHP_PSFP_GCE_ATTR_SGI] = { .type = NLA_U32 },
+	[MCHP_PSFP_GCE_ATTR_GCI] = { .type = NLA_U32 },
+	[MCHP_PSFP_SG_ATTR_CONF] = { .type = NLA_BINARY },
+	[MCHP_PSFP_SG_ATTR_STATUS] = { .type = NLA_BINARY },
+	[MCHP_PSFP_SG_ATTR_SGI] = { .type = NLA_U32 },
+	[MCHP_PSFP_FM_ATTR_CONF] = { .type = NLA_BINARY },
+	[MCHP_PSFP_FM_ATTR_FMI] = { .type = NLA_U32 },
 };
 
-static int lan966x_psfp_sf_conf_read(struct nl_msg *msg, void *arg)
+static int mchp_psfp_sf_conf_read(struct nl_msg *msg, void *arg)
 {
 	struct genlmsghdr *hdr = nlmsg_data(nlmsg_hdr(msg));
-	struct lan966x_psfp_sf_conf *conf = arg;
-	struct nlattr *attrs[LAN966X_PSFP_ATTR_END];
+	struct mchp_psfp_sf_conf *conf = arg;
+	struct nlattr *attrs[MCHP_PSFP_ATTR_END];
 
-	if (nla_parse(attrs, LAN966X_PSFP_ATTR_MAX, genlmsg_attrdata(hdr, 0),
-		      genlmsg_attrlen(hdr, 0), lan966x_psfp_genl_policy)) {
+	if (nla_parse(attrs, MCHP_PSFP_ATTR_MAX, genlmsg_attrdata(hdr, 0),
+		      genlmsg_attrlen(hdr, 0), mchp_psfp_genl_policy)) {
 		printf("nla_parse() failed\n");
 		return NL_STOP;
 	}
 
-	if (!attrs[LAN966X_PSFP_SF_ATTR_CONF]) {
+	if (!attrs[MCHP_PSFP_SF_ATTR_CONF]) {
 		printf("ATTR_CONF not found\n");
 		return -1;
 	}
 
-	nla_memcpy(conf, attrs[LAN966X_PSFP_SF_ATTR_CONF],
-		   sizeof(struct lan966x_psfp_sf_conf));
+	nla_memcpy(conf, attrs[MCHP_PSFP_SF_ATTR_CONF],
+		   sizeof(struct mchp_psfp_sf_conf));
 
 	return NL_OK;
 }
 
-static int lan966x_psfp_sf_conf_get(uint32_t sfi_id,
-				    struct lan966x_psfp_sf_conf *conf)
+static int mchp_psfp_sf_conf_get(uint32_t sfi_id,
+				    struct mchp_psfp_sf_conf *conf)
 {
-	struct lan966x_psfp_sf_conf tmp;
+	struct mchp_psfp_sf_conf tmp;
 	struct nl_sock *sk;
 	struct nl_msg *msg;
 	int rc = 0;
 
-	rc = lan966x_genl_start(LAN966X_PSFP_NETLINK,
-				LAN966X_PSFP_SF_GENL_CONF_GET, 1, &sk, &msg);
+	rc = mchp_genl_start(MCHP_PSFP_NETLINK,
+				MCHP_PSFP_SF_GENL_CONF_GET, 1, &sk, &msg);
 
 	nl_socket_modify_cb(sk, NL_CB_VALID, NL_CB_CUSTOM,
-			    lan966x_psfp_sf_conf_read, &tmp);
+			    mchp_psfp_sf_conf_read, &tmp);
 
-	NLA_PUT_U32(msg, LAN966X_PSFP_SF_ATTR_SFI, sfi_id);
+	NLA_PUT_U32(msg, MCHP_PSFP_SF_ATTR_SFI, sfi_id);
 
 	rc = nl_send_auto(sk, msg);
 	if (rc < 0) {
@@ -94,18 +94,18 @@ nla_put_failure:
 	return rc;
 }
 
-static int lan966x_psfp_sf_conf_set(uint32_t sfi_id,
-				    struct lan966x_psfp_sf_conf *conf)
+static int mchp_psfp_sf_conf_set(uint32_t sfi_id,
+				    struct mchp_psfp_sf_conf *conf)
 {
 	struct nl_sock *sk;
 	struct nl_msg *msg;
 	int rc = 0;
 
-	rc = lan966x_genl_start(LAN966X_PSFP_NETLINK,
-				LAN966X_PSFP_SF_GENL_CONF_SET, 1, &sk, &msg);
+	rc = mchp_genl_start(MCHP_PSFP_NETLINK,
+				MCHP_PSFP_SF_GENL_CONF_SET, 1, &sk, &msg);
 
-	NLA_PUT(msg, LAN966X_PSFP_SF_ATTR_CONF, sizeof(*conf), conf);
-	NLA_PUT_U32(msg, LAN966X_PSFP_SF_ATTR_SFI, sfi_id);
+	NLA_PUT(msg, MCHP_PSFP_SF_ATTR_CONF, sizeof(*conf), conf);
+	NLA_PUT_U32(msg, MCHP_PSFP_SF_ATTR_SFI, sfi_id);
 
 	rc = nl_send_auto(sk, msg);
 	if (rc < 0) {
@@ -125,45 +125,45 @@ nla_put_failure:
 	return rc;
 }
 
-static int lan966x_psfp_sf_counters_read(struct nl_msg *msg, void *arg)
+static int mchp_psfp_sf_counters_read(struct nl_msg *msg, void *arg)
 {
 	struct genlmsghdr *hdr = nlmsg_data(nlmsg_hdr(msg));
-	struct lan966x_psfp_sf_counters *counters = arg;
-	struct nlattr *attrs[LAN966X_PSFP_ATTR_END];
+	struct mchp_psfp_sf_counters *counters = arg;
+	struct nlattr *attrs[MCHP_PSFP_ATTR_END];
 
-	if (nla_parse(attrs, LAN966X_PSFP_ATTR_MAX, genlmsg_attrdata(hdr, 0),
-		      genlmsg_attrlen(hdr, 0), lan966x_psfp_genl_policy)) {
+	if (nla_parse(attrs, MCHP_PSFP_ATTR_MAX, genlmsg_attrdata(hdr, 0),
+		      genlmsg_attrlen(hdr, 0), mchp_psfp_genl_policy)) {
 		printf("nla_parse() failed\n");
 		return NL_STOP;
 	}
 
-	if (!attrs[LAN966X_PSFP_SF_ATTR_STATUS]) {
+	if (!attrs[MCHP_PSFP_SF_ATTR_STATUS]) {
 		printf("ATTR_STATUS not found\n");
 		return -1;
 	}
 
-	nla_memcpy(counters, attrs[LAN966X_PSFP_SF_ATTR_STATUS],
-		   sizeof(struct lan966x_psfp_sf_counters));
+	nla_memcpy(counters, attrs[MCHP_PSFP_SF_ATTR_STATUS],
+		   sizeof(struct mchp_psfp_sf_counters));
 
 	return NL_OK;
 }
 
-static void lan966x_psfp_sf_status_get(uint32_t sfi_id)
+static void mchp_psfp_sf_status_get(uint32_t sfi_id)
 {
-	struct lan966x_psfp_sf_counters counters;
+	struct mchp_psfp_sf_counters counters;
 	struct nl_sock *sk;
 	struct nl_msg *msg;
 	int rc;
 
 	memset(&counters, 0x0, sizeof(counters));
 
-	rc = lan966x_genl_start(LAN966X_PSFP_NETLINK,
-				LAN966X_PSFP_SF_GENL_STATUS_GET, 1, &sk, &msg);
+	rc = mchp_genl_start(MCHP_PSFP_NETLINK,
+				MCHP_PSFP_SF_GENL_STATUS_GET, 1, &sk, &msg);
 
 	nl_socket_modify_cb(sk, NL_CB_VALID, NL_CB_CUSTOM,
-			    lan966x_psfp_sf_counters_read, &counters);
+			    mchp_psfp_sf_counters_read, &counters);
 
-	NLA_PUT_U32(msg, LAN966X_PSFP_SF_ATTR_SFI, sfi_id);
+	NLA_PUT_U32(msg, MCHP_PSFP_SF_ATTR_SFI, sfi_id);
 
 	rc = nl_send_auto(sk, msg);
 	if (rc < 0) {
@@ -190,7 +190,7 @@ nla_put_failure:
 	nl_socket_free(sk);
 }
 
-static char *lan966x_psfp_sf_help(void)
+static char *mchp_psfp_sf_help(void)
 {
 	return "--enable:                 Enable filter\n"
 		" --max_sdu:                Maximum SDU size (zero disables SDU check)\n"
@@ -210,8 +210,8 @@ static int cmd_sf(int argc, char *const *argv)
 		{"status", no_argument, NULL, 'e'},
 		{NULL, 0, NULL, 0}
 	};
-	struct lan966x_psfp_sf_conf config;
-	struct lan966x_psfp_sf_conf tmp;
+	struct mchp_psfp_sf_conf config;
+	struct mchp_psfp_sf_conf tmp;
 	uint32_t sfi_id = 0;
 	int status = 0;
 	int ch;
@@ -219,7 +219,7 @@ static int cmd_sf(int argc, char *const *argv)
 	/* read the id */
 	sfi_id = atoi(argv[0]);
 
-	if (lan966x_psfp_sf_conf_get(sfi_id, &config) < 0)
+	if (mchp_psfp_sf_conf_get(sfi_id, &config) < 0)
 		return 0;
 
 	memcpy(&tmp, &config, sizeof(config));
@@ -245,7 +245,7 @@ static int cmd_sf(int argc, char *const *argv)
 	}
 
 	if (status) {
-		lan966x_psfp_sf_status_get(sfi_id);
+		mchp_psfp_sf_status_get(sfi_id);
 		return 0;
 	}
 
@@ -257,49 +257,49 @@ static int cmd_sf(int argc, char *const *argv)
 		return 0;
 	}
 
-	lan966x_psfp_sf_conf_set(sfi_id, &config);
+	mchp_psfp_sf_conf_set(sfi_id, &config);
 
 	return 0;
 }
 
-static int lan966x_psfp_sg_conf_read(struct nl_msg *msg, void *arg)
+static int mchp_psfp_sg_conf_read(struct nl_msg *msg, void *arg)
 {
 	struct genlmsghdr *hdr = nlmsg_data(nlmsg_hdr(msg));
-	struct lan966x_psfp_sg_conf *conf = arg;
-	struct nlattr *attrs[LAN966X_PSFP_ATTR_END];
+	struct mchp_psfp_sg_conf *conf = arg;
+	struct nlattr *attrs[MCHP_PSFP_ATTR_END];
 
-	if (nla_parse(attrs, LAN966X_PSFP_ATTR_MAX, genlmsg_attrdata(hdr, 0),
-		      genlmsg_attrlen(hdr, 0), lan966x_psfp_genl_policy)) {
+	if (nla_parse(attrs, MCHP_PSFP_ATTR_MAX, genlmsg_attrdata(hdr, 0),
+		      genlmsg_attrlen(hdr, 0), mchp_psfp_genl_policy)) {
 		printf("nla_parse() failed\n");
 		return NL_STOP;
 	}
 
-	if (!attrs[LAN966X_PSFP_SG_ATTR_CONF]) {
+	if (!attrs[MCHP_PSFP_SG_ATTR_CONF]) {
 		printf("ATTR_CONF not found\n");
 		return -1;
 	}
 
-	nla_memcpy(conf, attrs[LAN966X_PSFP_SG_ATTR_CONF],
-		   sizeof(struct lan966x_psfp_sg_conf));
+	nla_memcpy(conf, attrs[MCHP_PSFP_SG_ATTR_CONF],
+		   sizeof(struct mchp_psfp_sg_conf));
 
 	return NL_OK;
 }
 
-static int lan966x_psfp_sg_conf_get(uint32_t sgi_id,
-				    struct lan966x_psfp_sg_conf *conf)
+static int mchp_psfp_sg_conf_get(uint32_t sgi_id,
+				    struct mchp_psfp_sg_conf *conf)
 {
-	struct lan966x_psfp_sg_conf tmp;
+	struct mchp_psfp_sg_conf tmp;
 	struct nl_sock *sk;
 	struct nl_msg *msg;
 	int rc = 0;
 
-	rc = lan966x_genl_start(LAN966X_PSFP_NETLINK,
-				LAN966X_PSFP_SG_GENL_CONF_GET, 1, &sk, &msg);
+	rc = mchp_genl_start(MCHP_PSFP_NETLINK,
+				MCHP_PSFP_SG_GENL_CONF_GET, 1, &sk, &msg);
 
 	nl_socket_modify_cb(sk, NL_CB_VALID, NL_CB_CUSTOM,
-			    lan966x_psfp_sg_conf_read, &tmp);
+			    mchp_psfp_sg_conf_read, &tmp);
 
-	NLA_PUT_U32(msg, LAN966X_PSFP_SG_ATTR_SGI, sgi_id);
+	NLA_PUT_U32(msg, MCHP_PSFP_SG_ATTR_SGI, sgi_id);
 
 	rc = nl_send_auto(sk, msg);
 	if (rc < 0) {
@@ -323,18 +323,18 @@ nla_put_failure:
 	return rc;
 }
 
-static int lan966x_psfp_sg_conf_set(uint32_t sgi_id,
-				    struct lan966x_psfp_sg_conf *conf)
+static int mchp_psfp_sg_conf_set(uint32_t sgi_id,
+				    struct mchp_psfp_sg_conf *conf)
 {
 	struct nl_sock *sk;
 	struct nl_msg *msg;
 	int rc = 0;
 
-	rc = lan966x_genl_start(LAN966X_PSFP_NETLINK,
-				LAN966X_PSFP_SG_GENL_CONF_SET, 1, &sk, &msg);
+	rc = mchp_genl_start(MCHP_PSFP_NETLINK,
+				MCHP_PSFP_SG_GENL_CONF_SET, 1, &sk, &msg);
 
-	NLA_PUT(msg, LAN966X_PSFP_SG_ATTR_CONF, sizeof(*conf), conf);
-	NLA_PUT_U32(msg, LAN966X_PSFP_SG_ATTR_SGI, sgi_id);
+	NLA_PUT(msg, MCHP_PSFP_SG_ATTR_CONF, sizeof(*conf), conf);
+	NLA_PUT_U32(msg, MCHP_PSFP_SG_ATTR_SGI, sgi_id);
 
 	rc = nl_send_auto(sk, msg);
 	if (rc < 0) {
@@ -354,45 +354,45 @@ nla_put_failure:
 	return rc;
 }
 
-static int lan966x_psfp_sg_status_read(struct nl_msg *msg, void *arg)
+static int mchp_psfp_sg_status_read(struct nl_msg *msg, void *arg)
 {
 	struct genlmsghdr *hdr = nlmsg_data(nlmsg_hdr(msg));
-	struct lan966x_psfp_sg_status *status = arg;
-	struct nlattr *attrs[LAN966X_PSFP_ATTR_END];
+	struct mchp_psfp_sg_status *status = arg;
+	struct nlattr *attrs[MCHP_PSFP_ATTR_END];
 
-	if (nla_parse(attrs, LAN966X_PSFP_ATTR_MAX, genlmsg_attrdata(hdr, 0),
-		      genlmsg_attrlen(hdr, 0), lan966x_psfp_genl_policy)) {
+	if (nla_parse(attrs, MCHP_PSFP_ATTR_MAX, genlmsg_attrdata(hdr, 0),
+		      genlmsg_attrlen(hdr, 0), mchp_psfp_genl_policy)) {
 		printf("nla_parse() failed\n");
 		return NL_STOP;
 	}
 
-	if (!attrs[LAN966X_PSFP_SG_ATTR_STATUS]) {
+	if (!attrs[MCHP_PSFP_SG_ATTR_STATUS]) {
 		printf("ATTR_STATUS not found\n");
 		return -1;
 	}
 
-	nla_memcpy(status, attrs[LAN966X_PSFP_SG_ATTR_STATUS],
-		   sizeof(struct lan966x_psfp_sg_status));
+	nla_memcpy(status, attrs[MCHP_PSFP_SG_ATTR_STATUS],
+		   sizeof(struct mchp_psfp_sg_status));
 
 	return NL_OK;
 }
 
-static void lan966x_psfp_sg_status_get(uint32_t sgi_id)
+static void mchp_psfp_sg_status_get(uint32_t sgi_id)
 {
-	struct lan966x_psfp_sg_status status;
+	struct mchp_psfp_sg_status status;
 	struct nl_sock *sk;
 	struct nl_msg *msg;
 	int rc;
 
 	memset(&status, 0x0, sizeof(status));
 
-	rc = lan966x_genl_start(LAN966X_PSFP_NETLINK,
-				LAN966X_PSFP_SG_GENL_STATUS_GET, 1, &sk, &msg);
+	rc = mchp_genl_start(MCHP_PSFP_NETLINK,
+				MCHP_PSFP_SG_GENL_STATUS_GET, 1, &sk, &msg);
 
 	nl_socket_modify_cb(sk, NL_CB_VALID, NL_CB_CUSTOM,
-			    lan966x_psfp_sg_status_read, &status);
+			    mchp_psfp_sg_status_read, &status);
 
-	NLA_PUT_U32(msg, LAN966X_PSFP_SG_ATTR_SGI, sgi_id);
+	NLA_PUT_U32(msg, MCHP_PSFP_SG_ATTR_SGI, sgi_id);
 
 	rc = nl_send_auto(sk, msg);
 	if (rc < 0) {
@@ -423,7 +423,7 @@ nla_put_failure:
 	nl_socket_free(sk);
 }
 
-static char *lan966x_psfp_sg_help(void)
+static char *mchp_psfp_sg_help(void)
 {
 	return "--enable:                       PSFPGateEnabled: Enable/disable Gate\n"
 		" --gate_open:                    PSFPAdminGateStates: Initial gate state\n"
@@ -461,8 +461,8 @@ static int cmd_sg(int argc, char *const *argv)
 		{"status", no_argument, NULL, 'n'},
 		{NULL, 0, NULL, 0}
 	};
-	struct lan966x_psfp_sg_conf config;
-	struct lan966x_psfp_sg_conf tmp;
+	struct mchp_psfp_sg_conf config;
+	struct mchp_psfp_sg_conf tmp;
 	uint32_t sgi_id = 0;
 	int status = 0;
 	int ch;
@@ -470,7 +470,7 @@ static int cmd_sg(int argc, char *const *argv)
 	/* read the id */
 	sgi_id = atoi(argv[0]);
 
-	if (lan966x_psfp_sg_conf_get(sgi_id, &config) < 0)
+	if (mchp_psfp_sg_conf_get(sgi_id, &config) < 0)
 		return 0;
 
 	memcpy(&tmp, &config, sizeof(config));
@@ -523,7 +523,7 @@ static int cmd_sg(int argc, char *const *argv)
 	}
 
 	if (status) {
-		lan966x_psfp_sg_status_get(sgi_id);
+		mchp_psfp_sg_status_get(sgi_id);
 		return 0;
 	}
 
@@ -544,50 +544,50 @@ static int cmd_sg(int argc, char *const *argv)
 		return 0;
 	}
 
-	lan966x_psfp_sg_conf_set(sgi_id, &config);
+	mchp_psfp_sg_conf_set(sgi_id, &config);
 
 	return 0;
 }
 
-static int lan966x_psfp_gce_conf_read(struct nl_msg *msg, void *arg)
+static int mchp_psfp_gce_conf_read(struct nl_msg *msg, void *arg)
 {
 	struct genlmsghdr *hdr = nlmsg_data(nlmsg_hdr(msg));
-	struct lan966x_psfp_gce *conf = arg;
-	struct nlattr *attrs[LAN966X_PSFP_ATTR_END];
+	struct mchp_psfp_gce *conf = arg;
+	struct nlattr *attrs[MCHP_PSFP_ATTR_END];
 
-	if (nla_parse(attrs, LAN966X_PSFP_ATTR_MAX, genlmsg_attrdata(hdr, 0),
-		      genlmsg_attrlen(hdr, 0), lan966x_psfp_genl_policy)) {
+	if (nla_parse(attrs, MCHP_PSFP_ATTR_MAX, genlmsg_attrdata(hdr, 0),
+		      genlmsg_attrlen(hdr, 0), mchp_psfp_genl_policy)) {
 		printf("nla_parse() failed\n");
 		return NL_STOP;
 	}
 
-	if (!attrs[LAN966X_PSFP_GCE_ATTR_CONF]) {
+	if (!attrs[MCHP_PSFP_GCE_ATTR_CONF]) {
 		printf("ATTR_CONF not found\n");
 		return -1;
 	}
 
-	nla_memcpy(conf, attrs[LAN966X_PSFP_GCE_ATTR_CONF],
-		   sizeof(struct lan966x_psfp_gce));
+	nla_memcpy(conf, attrs[MCHP_PSFP_GCE_ATTR_CONF],
+		   sizeof(struct mchp_psfp_gce));
 
 	return NL_OK;
 }
 
-static int lan966x_psfp_gce_conf_get(uint32_t sgi_id, uint32_t gce_id,
-				     struct lan966x_psfp_gce *conf)
+static int mchp_psfp_gce_conf_get(uint32_t sgi_id, uint32_t gce_id,
+				     struct mchp_psfp_gce *conf)
 {
-	struct lan966x_psfp_gce tmp;
+	struct mchp_psfp_gce tmp;
 	struct nl_sock *sk;
 	struct nl_msg *msg;
 	int rc = 0;
 
-	rc = lan966x_genl_start(LAN966X_PSFP_NETLINK,
-				LAN966X_PSFP_GCE_GENL_CONF_GET, 1, &sk, &msg);
+	rc = mchp_genl_start(MCHP_PSFP_NETLINK,
+				MCHP_PSFP_GCE_GENL_CONF_GET, 1, &sk, &msg);
 
 	nl_socket_modify_cb(sk, NL_CB_VALID, NL_CB_CUSTOM,
-			    lan966x_psfp_gce_conf_read, &tmp);
+			    mchp_psfp_gce_conf_read, &tmp);
 
-	NLA_PUT_U32(msg, LAN966X_PSFP_GCE_ATTR_SGI, sgi_id);
-	NLA_PUT_U32(msg, LAN966X_PSFP_GCE_ATTR_GCI, gce_id);
+	NLA_PUT_U32(msg, MCHP_PSFP_GCE_ATTR_SGI, sgi_id);
+	NLA_PUT_U32(msg, MCHP_PSFP_GCE_ATTR_GCI, gce_id);
 
 	rc = nl_send_auto(sk, msg);
 	if (rc < 0) {
@@ -611,19 +611,19 @@ nla_put_failure:
 	return rc;
 }
 
-static int lan966x_psfp_gce_conf_set(uint32_t sgi_id, uint32_t gce_id,
-				     struct lan966x_psfp_gce *conf)
+static int mchp_psfp_gce_conf_set(uint32_t sgi_id, uint32_t gce_id,
+				     struct mchp_psfp_gce *conf)
 {
 	struct nl_sock *sk;
 	struct nl_msg *msg;
 	int rc = 0;
 
-	rc = lan966x_genl_start(LAN966X_PSFP_NETLINK,
-				LAN966X_PSFP_GCE_GENL_CONF_SET, 1, &sk, &msg);
+	rc = mchp_genl_start(MCHP_PSFP_NETLINK,
+				MCHP_PSFP_GCE_GENL_CONF_SET, 1, &sk, &msg);
 
-	NLA_PUT(msg, LAN966X_PSFP_GCE_ATTR_CONF, sizeof(*conf), conf);
-	NLA_PUT_U32(msg, LAN966X_PSFP_GCE_ATTR_SGI, sgi_id);
-	NLA_PUT_U32(msg, LAN966X_PSFP_GCE_ATTR_GCI, gce_id);
+	NLA_PUT(msg, MCHP_PSFP_GCE_ATTR_CONF, sizeof(*conf), conf);
+	NLA_PUT_U32(msg, MCHP_PSFP_GCE_ATTR_SGI, sgi_id);
+	NLA_PUT_U32(msg, MCHP_PSFP_GCE_ATTR_GCI, gce_id);
 
 	rc = nl_send_auto(sk, msg);
 	if (rc < 0) {
@@ -643,46 +643,46 @@ nla_put_failure:
 	return rc;
 }
 
-static int lan966x_psfp_gce_status_read(struct nl_msg *msg, void *arg)
+static int mchp_psfp_gce_status_read(struct nl_msg *msg, void *arg)
 {
 	struct genlmsghdr *hdr = nlmsg_data(nlmsg_hdr(msg));
-	struct lan966x_psfp_gce *status = arg;
-	struct nlattr *attrs[LAN966X_PSFP_ATTR_END];
+	struct mchp_psfp_gce *status = arg;
+	struct nlattr *attrs[MCHP_PSFP_ATTR_END];
 
-	if (nla_parse(attrs, LAN966X_PSFP_ATTR_MAX, genlmsg_attrdata(hdr, 0),
-		      genlmsg_attrlen(hdr, 0), lan966x_psfp_genl_policy)) {
+	if (nla_parse(attrs, MCHP_PSFP_ATTR_MAX, genlmsg_attrdata(hdr, 0),
+		      genlmsg_attrlen(hdr, 0), mchp_psfp_genl_policy)) {
 		printf("nla_parse() failed\n");
 		return NL_STOP;
 	}
 
-	if (!attrs[LAN966X_PSFP_GCE_ATTR_CONF]) {
+	if (!attrs[MCHP_PSFP_GCE_ATTR_CONF]) {
 		printf("ATTR_STATUS not found\n");
 		return -1;
 	}
 
-	nla_memcpy(status, attrs[LAN966X_PSFP_GCE_ATTR_CONF],
-		   sizeof(struct lan966x_psfp_gce));
+	nla_memcpy(status, attrs[MCHP_PSFP_GCE_ATTR_CONF],
+		   sizeof(struct mchp_psfp_gce));
 
 	return NL_OK;
 }
 
-static void lan966x_psfp_gce_status_get(uint32_t sgi_id, uint32_t gce_id)
+static void mchp_psfp_gce_status_get(uint32_t sgi_id, uint32_t gce_id)
 {
-	struct lan966x_psfp_gce status;
+	struct mchp_psfp_gce status;
 	struct nl_sock *sk;
 	struct nl_msg *msg;
 	int rc;
 
 	memset(&status, 0x0, sizeof(status));
 
-	rc = lan966x_genl_start(LAN966X_PSFP_NETLINK,
-				LAN966X_PSFP_GCE_GENL_STATUS_GET, 1, &sk, &msg);
+	rc = mchp_genl_start(MCHP_PSFP_NETLINK,
+				MCHP_PSFP_GCE_GENL_STATUS_GET, 1, &sk, &msg);
 
 	nl_socket_modify_cb(sk, NL_CB_VALID, NL_CB_CUSTOM,
-			    lan966x_psfp_gce_status_read, &status);
+			    mchp_psfp_gce_status_read, &status);
 
-	NLA_PUT_U32(msg, LAN966X_PSFP_GCE_ATTR_SGI, sgi_id);
-	NLA_PUT_U32(msg, LAN966X_PSFP_GCE_ATTR_GCI, gce_id);
+	NLA_PUT_U32(msg, MCHP_PSFP_GCE_ATTR_SGI, sgi_id);
+	NLA_PUT_U32(msg, MCHP_PSFP_GCE_ATTR_GCI, gce_id);
 
 	rc = nl_send_auto(sk, msg);
 	if (rc < 0) {
@@ -708,7 +708,7 @@ nla_put_failure:
 	nl_socket_free(sk);
 }
 
-static char *lan966x_psfp_gce_help(void)
+static char *mchp_psfp_gce_help(void)
 {
 	return "--gate_open:     StreamGateState\n"
 		" --ipv_enable:    enable IPV\n"
@@ -730,8 +730,8 @@ static int cmd_gce(int argc, char *const *argv)
 		{"status", no_argument, NULL, 'f'},
 		{NULL, 0, NULL, 0}
 	};
-	struct lan966x_psfp_gce config;
-	struct lan966x_psfp_gce tmp;
+	struct mchp_psfp_gce config;
+	struct mchp_psfp_gce tmp;
 	uint32_t sgi_id = 0;
 	uint32_t gce_id = 0;
 	int status = 0;
@@ -745,7 +745,7 @@ static int cmd_gce(int argc, char *const *argv)
 	/* read the next id */
 	gce_id = atoi(argv[0]);
 
-	if (lan966x_psfp_gce_conf_get(sgi_id, gce_id, &config) < 0)
+	if (mchp_psfp_gce_conf_get(sgi_id, gce_id, &config) < 0)
 		return 0;
 
 	memcpy(&tmp, &config, sizeof(config));
@@ -774,7 +774,7 @@ static int cmd_gce(int argc, char *const *argv)
 	}
 
 	if (status) {
-		lan966x_psfp_gce_status_get(sgi_id, gce_id);
+		mchp_psfp_gce_status_get(sgi_id, gce_id);
 		return 0;
 	}
 
@@ -787,49 +787,49 @@ static int cmd_gce(int argc, char *const *argv)
 		return 0;
 	}
 
-	lan966x_psfp_gce_conf_set(sgi_id, gce_id, &config);
+	mchp_psfp_gce_conf_set(sgi_id, gce_id, &config);
 
 	return 0;
 }
 
-static int lan966x_psfp_fm_conf_read(struct nl_msg *msg, void *arg)
+static int mchp_psfp_fm_conf_read(struct nl_msg *msg, void *arg)
 {
 	struct genlmsghdr *hdr = nlmsg_data(nlmsg_hdr(msg));
-	struct lan966x_psfp_fm_conf *conf = arg;
-	struct nlattr *attrs[LAN966X_PSFP_ATTR_END];
+	struct mchp_psfp_fm_conf *conf = arg;
+	struct nlattr *attrs[MCHP_PSFP_ATTR_END];
 
-	if (nla_parse(attrs, LAN966X_PSFP_ATTR_MAX, genlmsg_attrdata(hdr, 0),
-		      genlmsg_attrlen(hdr, 0), lan966x_psfp_genl_policy)) {
+	if (nla_parse(attrs, MCHP_PSFP_ATTR_MAX, genlmsg_attrdata(hdr, 0),
+		      genlmsg_attrlen(hdr, 0), mchp_psfp_genl_policy)) {
 		printf("nla_parse() failed\n");
 		return NL_STOP;
 	}
 
-	if (!attrs[LAN966X_PSFP_FM_ATTR_CONF]) {
+	if (!attrs[MCHP_PSFP_FM_ATTR_CONF]) {
 		printf("ATTR_CONF not found\n");
 		return -1;
 	}
 
-	nla_memcpy(conf, attrs[LAN966X_PSFP_FM_ATTR_CONF],
-		   sizeof(struct lan966x_psfp_fm_conf));
+	nla_memcpy(conf, attrs[MCHP_PSFP_FM_ATTR_CONF],
+		   sizeof(struct mchp_psfp_fm_conf));
 
 	return NL_OK;
 }
 
-static int lan966x_psfp_fm_conf_get(uint32_t fmi_id,
-				    struct lan966x_psfp_fm_conf *conf)
+static int mchp_psfp_fm_conf_get(uint32_t fmi_id,
+				    struct mchp_psfp_fm_conf *conf)
 {
-	struct lan966x_psfp_fm_conf tmp;
+	struct mchp_psfp_fm_conf tmp;
 	struct nl_sock *sk;
 	struct nl_msg *msg;
 	int rc = 0;
 
-	rc = lan966x_genl_start(LAN966X_PSFP_NETLINK,
-				LAN966X_PSFP_FM_GENL_CONF_GET, 1, &sk, &msg);
+	rc = mchp_genl_start(MCHP_PSFP_NETLINK,
+				MCHP_PSFP_FM_GENL_CONF_GET, 1, &sk, &msg);
 
 	nl_socket_modify_cb(sk, NL_CB_VALID, NL_CB_CUSTOM,
-			    lan966x_psfp_fm_conf_read, &tmp);
+			    mchp_psfp_fm_conf_read, &tmp);
 
-	NLA_PUT_U32(msg, LAN966X_PSFP_FM_ATTR_FMI, fmi_id);
+	NLA_PUT_U32(msg, MCHP_PSFP_FM_ATTR_FMI, fmi_id);
 
 	rc = nl_send_auto(sk, msg);
 	if (rc < 0) {
@@ -853,18 +853,18 @@ nla_put_failure:
 	return rc;
 }
 
-static int lan966x_psfp_fm_conf_set(uint32_t fmi_id,
-				     struct lan966x_psfp_fm_conf *conf)
+static int mchp_psfp_fm_conf_set(uint32_t fmi_id,
+				     struct mchp_psfp_fm_conf *conf)
 {
 	struct nl_sock *sk;
 	struct nl_msg *msg;
 	int rc = 0;
 
-	rc = lan966x_genl_start(LAN966X_PSFP_NETLINK,
-				LAN966X_PSFP_FM_GENL_CONF_SET, 1, &sk, &msg);
+	rc = mchp_genl_start(MCHP_PSFP_NETLINK,
+				MCHP_PSFP_FM_GENL_CONF_SET, 1, &sk, &msg);
 
-	NLA_PUT(msg, LAN966X_PSFP_FM_ATTR_CONF, sizeof(*conf), conf);
-	NLA_PUT_U32(msg, LAN966X_PSFP_FM_ATTR_FMI, fmi_id);
+	NLA_PUT(msg, MCHP_PSFP_FM_ATTR_CONF, sizeof(*conf), conf);
+	NLA_PUT_U32(msg, MCHP_PSFP_FM_ATTR_FMI, fmi_id);
 
 	rc = nl_send_auto(sk, msg);
 	if (rc < 0) {
@@ -884,7 +884,7 @@ nla_put_failure:
 	return rc;
 }
 
-static char *lan966x_psfp_fm_help(void)
+static char *mchp_psfp_fm_help(void)
 {
 	return "--enable:          Enable flow meter\n"
 		" --cir:             kbit/s\n"
@@ -912,8 +912,8 @@ static int cmd_fm(int argc, char *const *argv)
 		{"mark_red",required_argument, NULL, 'i'},
 		{NULL, 0, NULL, 0}
 	};
-	struct lan966x_psfp_fm_conf config;
-	struct lan966x_psfp_fm_conf tmp;
+	struct mchp_psfp_fm_conf config;
+	struct mchp_psfp_fm_conf tmp;
 	uint32_t fmi_id = 0;
 	int status = 0;
 	int ch;
@@ -921,7 +921,7 @@ static int cmd_fm(int argc, char *const *argv)
 	/* read the id */
 	fmi_id = atoi(argv[0]);
 
-	if (lan966x_psfp_fm_conf_get(fmi_id, &config) < 0)
+	if (mchp_psfp_fm_conf_get(fmi_id, &config) < 0)
 		return 0;
 
 	memcpy(&tmp, &config, sizeof(config));
@@ -971,7 +971,7 @@ static int cmd_fm(int argc, char *const *argv)
 		return 0;
 	}
 
-	lan966x_psfp_fm_conf_set(fmi_id, &config);
+	mchp_psfp_fm_conf_set(fmi_id, &config);
 
 	return 0;
 }
@@ -979,10 +979,10 @@ static int cmd_fm(int argc, char *const *argv)
 static const struct command commands[] =
 {
 	/* Add/delete bridges */
-	{1, "sf", cmd_sf, "sf sfi [options]", lan966x_psfp_sf_help},
-	{1, "sg", cmd_sg, "sg sgi [options]", lan966x_psfp_sg_help},
-	{2, "gce", cmd_gce, "gce sgi gce [options]", lan966x_psfp_gce_help},
-	{1, "fm", cmd_fm, "fm fmi [options]", lan966x_psfp_fm_help},
+	{1, "sf", cmd_sf, "sf sfi [options]", mchp_psfp_sf_help},
+	{1, "sg", cmd_sg, "sg sgi [options]", mchp_psfp_sg_help},
+	{2, "gce", cmd_gce, "gce sgi gce [options]", mchp_psfp_gce_help},
+	{1, "fm", cmd_fm, "fm fmi [options]", mchp_psfp_fm_help},
 };
 
 static void command_helpall(void)

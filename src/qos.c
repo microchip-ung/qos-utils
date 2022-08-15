@@ -8,7 +8,7 @@
 #include <errno.h>
 #include <net/if.h>
 #include "kernel_types.h"
-#include "lan966x_ui_qos.h"
+#include "mchp_ui_qos.h"
 
 struct command
 {
@@ -21,12 +21,12 @@ struct command
 
 static void command_help(const struct command *cmd);
 
-static struct nla_policy lan966x_qos_genl_policy[LAN966X_QOS_ATTR_END] = {
-	[LAN966X_QOS_ATTR_NONE] = { .type = NLA_UNSPEC },
-	[LAN966X_QOS_ATTR_DEV] = { .type = NLA_U32 },
-	[LAN966X_QOS_ATTR_PORT_CFG] = { .type = NLA_BINARY },
-	[LAN966X_QOS_ATTR_DSCP] = { .type = NLA_U32 },
-	[LAN966X_QOS_ATTR_DSCP_PRIO_DPL] = { .type = NLA_BINARY },
+static struct nla_policy mchp_qos_genl_policy[MCHP_QOS_ATTR_END] = {
+	[MCHP_QOS_ATTR_NONE] = { .type = NLA_UNSPEC },
+	[MCHP_QOS_ATTR_DEV] = { .type = NLA_U32 },
+	[MCHP_QOS_ATTR_PORT_CFG] = { .type = NLA_BINARY },
+	[MCHP_QOS_ATTR_DSCP] = { .type = NLA_U32 },
+	[MCHP_QOS_ATTR_DSCP_PRIO_DPL] = { .type = NLA_BINARY },
 };
 
 static char *i_tag_map_help(void)
@@ -86,19 +86,19 @@ static char *e_mode_help(void)
 	       "  --help:       Show this help text\n";
 }
 
-static int lan966x_qos_genl_port_cfg_set(u32 ifindex,
-					 const struct lan966x_qos_port_conf *cfg)
+static int mchp_qos_genl_port_cfg_set(u32 ifindex,
+					 const struct mchp_qos_port_conf *cfg)
 {
 	RETURN_IF_PC;
 	struct nl_sock *sk;
 	struct nl_msg *msg;
 	int rc = 0;
 
-	rc = lan966x_genl_start(LAN966X_QOS_NETLINK,
-				LAN966X_QOS_GENL_PORT_CFG_SET, 1, &sk, &msg);
+	rc = mchp_genl_start(MCHP_QOS_NETLINK,
+				MCHP_QOS_GENL_PORT_CFG_SET, 1, &sk, &msg);
 
-	NLA_PUT_U32(msg, LAN966X_QOS_ATTR_DEV, ifindex);
-	NLA_PUT(msg, LAN966X_QOS_ATTR_PORT_CFG, sizeof(*cfg), cfg);
+	NLA_PUT_U32(msg, MCHP_QOS_ATTR_DEV, ifindex);
+	NLA_PUT(msg, MCHP_QOS_ATTR_PORT_CFG, sizeof(*cfg), cfg);
 
 	rc = nl_send_auto(sk, msg);
 	if (rc < 0) {
@@ -118,45 +118,45 @@ nla_put_failure:
 	return rc;
 }
 
-static int lan966x_qos_genl_port_cfg_get_cb(struct nl_msg *msg, void *arg)
+static int mchp_qos_genl_port_cfg_get_cb(struct nl_msg *msg, void *arg)
 {
 	struct genlmsghdr *hdr = nlmsg_data(nlmsg_hdr(msg));
-	struct nlattr *attrs[LAN966X_QOS_ATTR_END];
-	struct lan966x_qos_port_conf *cfg = arg;
+	struct nlattr *attrs[MCHP_QOS_ATTR_END];
+	struct mchp_qos_port_conf *cfg = arg;
 
-	if (nla_parse(attrs, LAN966X_QOS_ATTR_MAX, genlmsg_attrdata(hdr, 0),
-		      genlmsg_attrlen(hdr, 0), lan966x_qos_genl_policy)) {
+	if (nla_parse(attrs, MCHP_QOS_ATTR_MAX, genlmsg_attrdata(hdr, 0),
+		      genlmsg_attrlen(hdr, 0), mchp_qos_genl_policy)) {
 		printf("nla_parse() failed\n");
 		return NL_STOP;
 	}
 
-	if (!attrs[LAN966X_QOS_ATTR_PORT_CFG]) {
+	if (!attrs[MCHP_QOS_ATTR_PORT_CFG]) {
 		printf("ATTR_PORT_CFG not found\n");
 		return -1;
 	}
 
-	nla_memcpy(cfg, attrs[LAN966X_QOS_ATTR_PORT_CFG],
-		   sizeof(struct lan966x_qos_port_conf));
+	nla_memcpy(cfg, attrs[MCHP_QOS_ATTR_PORT_CFG],
+		   sizeof(struct mchp_qos_port_conf));
 
 	return NL_OK;
 }
 
-static int lan966x_qos_genl_port_cfg_get(u32 ifindex,
-					 struct lan966x_qos_port_conf *cfg)
+static int mchp_qos_genl_port_cfg_get(u32 ifindex,
+					 struct mchp_qos_port_conf *cfg)
 {
 	RETURN_IF_PC;
-	struct lan966x_qos_port_conf tmp;
+	struct mchp_qos_port_conf tmp;
 	struct nl_sock *sk;
 	struct nl_msg *msg;
 	int rc = 0;
 
-	rc = lan966x_genl_start(LAN966X_QOS_NETLINK,
-				LAN966X_QOS_GENL_PORT_CFG_GET, 1, &sk, &msg);
+	rc = mchp_genl_start(MCHP_QOS_NETLINK,
+				MCHP_QOS_GENL_PORT_CFG_GET, 1, &sk, &msg);
 
 	nl_socket_modify_cb(sk, NL_CB_VALID, NL_CB_CUSTOM,
-			    lan966x_qos_genl_port_cfg_get_cb, &tmp);
+			    mchp_qos_genl_port_cfg_get_cb, &tmp);
 
-	NLA_PUT_U32(msg, LAN966X_QOS_ATTR_DEV, ifindex);
+	NLA_PUT_U32(msg, MCHP_QOS_ATTR_DEV, ifindex);
 
 	rc = nl_send_auto(sk, msg);
 	if (rc < 0) {
@@ -180,19 +180,19 @@ nla_put_failure:
 	return rc;
 }
 
-static int lan966x_qos_genl_dscp_prio_dpl_set(u32 dscp,
-					      const struct lan966x_qos_dscp_prio_dpl *cfg)
+static int mchp_qos_genl_dscp_prio_dpl_set(u32 dscp,
+					      const struct mchp_qos_dscp_prio_dpl *cfg)
 {
 	RETURN_IF_PC;
 	struct nl_sock *sk;
 	struct nl_msg *msg;
 	int rc = 0;
 
-	rc = lan966x_genl_start(LAN966X_QOS_NETLINK,
-				LAN966X_QOS_GENL_DSCP_PRIO_DPL_SET, 1, &sk, &msg);
+	rc = mchp_genl_start(MCHP_QOS_NETLINK,
+				MCHP_QOS_GENL_DSCP_PRIO_DPL_SET, 1, &sk, &msg);
 
-	NLA_PUT_U32(msg, LAN966X_QOS_ATTR_DSCP, dscp);
-	NLA_PUT(msg, LAN966X_QOS_ATTR_DSCP_PRIO_DPL, sizeof(*cfg), cfg);
+	NLA_PUT_U32(msg, MCHP_QOS_ATTR_DSCP, dscp);
+	NLA_PUT(msg, MCHP_QOS_ATTR_DSCP_PRIO_DPL, sizeof(*cfg), cfg);
 
 	rc = nl_send_auto(sk, msg);
 	if (rc < 0) {
@@ -212,45 +212,45 @@ nla_put_failure:
 	return rc;
 }
 
-static int lan966x_qos_genl_dscp_prio_dpl_get_cb(struct nl_msg *msg, void *arg)
+static int mchp_qos_genl_dscp_prio_dpl_get_cb(struct nl_msg *msg, void *arg)
 {
 	struct genlmsghdr *hdr = nlmsg_data(nlmsg_hdr(msg));
-	struct nlattr *attrs[LAN966X_QOS_ATTR_END];
-	struct lan966x_qos_dscp_prio_dpl *cfg = arg;
+	struct nlattr *attrs[MCHP_QOS_ATTR_END];
+	struct mchp_qos_dscp_prio_dpl *cfg = arg;
 
-	if (nla_parse(attrs, LAN966X_QOS_ATTR_MAX, genlmsg_attrdata(hdr, 0),
-		      genlmsg_attrlen(hdr, 0), lan966x_qos_genl_policy)) {
+	if (nla_parse(attrs, MCHP_QOS_ATTR_MAX, genlmsg_attrdata(hdr, 0),
+		      genlmsg_attrlen(hdr, 0), mchp_qos_genl_policy)) {
 		printf("nla_parse() failed\n");
 		return NL_STOP;
 	}
 
-	if (!attrs[LAN966X_QOS_ATTR_DSCP_PRIO_DPL]) {
+	if (!attrs[MCHP_QOS_ATTR_DSCP_PRIO_DPL]) {
 		printf("ATTR_PORT_CFG not found\n");
 		return -1;
 	}
 
-	nla_memcpy(cfg, attrs[LAN966X_QOS_ATTR_DSCP_PRIO_DPL],
-		   sizeof(struct lan966x_qos_dscp_prio_dpl));
+	nla_memcpy(cfg, attrs[MCHP_QOS_ATTR_DSCP_PRIO_DPL],
+		   sizeof(struct mchp_qos_dscp_prio_dpl));
 
 	return NL_OK;
 }
 
-static int lan966x_qos_genl_dscp_prio_dpl_get(u32 dscp,
-					      struct lan966x_qos_dscp_prio_dpl *cfg)
+static int mchp_qos_genl_dscp_prio_dpl_get(u32 dscp,
+					      struct mchp_qos_dscp_prio_dpl *cfg)
 {
 	RETURN_IF_PC;
-	struct lan966x_qos_dscp_prio_dpl tmp;
+	struct mchp_qos_dscp_prio_dpl tmp;
 	struct nl_sock *sk;
 	struct nl_msg *msg;
 	int rc = 0;
 
-	rc = lan966x_genl_start(LAN966X_QOS_NETLINK,
-				LAN966X_QOS_GENL_DSCP_PRIO_DPL_GET, 1, &sk, &msg);
+	rc = mchp_genl_start(MCHP_QOS_NETLINK,
+				MCHP_QOS_GENL_DSCP_PRIO_DPL_GET, 1, &sk, &msg);
 
 	nl_socket_modify_cb(sk, NL_CB_VALID, NL_CB_CUSTOM,
-			    lan966x_qos_genl_dscp_prio_dpl_get_cb, &tmp);
+			    mchp_qos_genl_dscp_prio_dpl_get_cb, &tmp);
 
-	NLA_PUT_U32(msg, LAN966X_QOS_ATTR_DSCP, dscp);
+	NLA_PUT_U32(msg, MCHP_QOS_ATTR_DSCP, dscp);
 
 	rc = nl_send_auto(sk, msg);
 	if (rc < 0) {
@@ -283,8 +283,8 @@ static int cmd_i_tag_map(const struct command *cmd, int argc, char *const *argv)
 		{"help", no_argument, NULL, 'h'},
 		{NULL, 0, NULL, 0}
 	};
-	struct lan966x_qos_port_conf cfg = {};
-	struct lan966x_qos_port_conf tmp;
+	struct mchp_qos_port_conf cfg = {};
+	struct mchp_qos_port_conf tmp;
 	int do_help = 0;
 	u32 ifindex = 0;
 	int ch, len, i;
@@ -296,7 +296,7 @@ static int cmd_i_tag_map(const struct command *cmd, int argc, char *const *argv)
 		return 1;
 	}
 
-	if (lan966x_qos_genl_port_cfg_get(ifindex, &cfg) < 0)
+	if (mchp_qos_genl_port_cfg_get(ifindex, &cfg) < 0)
 		return 0;
 
 	memcpy(&tmp, &cfg, sizeof(cfg));
@@ -366,7 +366,7 @@ static int cmd_i_tag_map(const struct command *cmd, int argc, char *const *argv)
 		return 0;
 	}
 
-	return lan966x_qos_genl_port_cfg_set(ifindex, &cfg);
+	return mchp_qos_genl_port_cfg_set(ifindex, &cfg);
 }
 
 static int cmd_i_dscp_map(const struct command *cmd, int argc, char *const *argv)
@@ -379,8 +379,8 @@ static int cmd_i_dscp_map(const struct command *cmd, int argc, char *const *argv
 		{"help", no_argument, NULL, 'h'},
 		{NULL, 0, NULL, 0}
 	};
-	struct lan966x_qos_dscp_prio_dpl cfg = {};
-	struct lan966x_qos_dscp_prio_dpl tmp;
+	struct mchp_qos_dscp_prio_dpl cfg = {};
+	struct mchp_qos_dscp_prio_dpl tmp;
 	int do_help = 0;
 	u32 dscp = 0;
 	int ch;
@@ -388,7 +388,7 @@ static int cmd_i_dscp_map(const struct command *cmd, int argc, char *const *argv
 	/* read the DSCP value to map */
 	dscp = atoi(argv[0]);
 
-	if (lan966x_qos_genl_dscp_prio_dpl_get(dscp, &cfg) < 0)
+	if (mchp_qos_genl_dscp_prio_dpl_get(dscp, &cfg) < 0)
 		return 0;
 
 	memcpy(&tmp, &cfg, sizeof(cfg));
@@ -421,7 +421,7 @@ static int cmd_i_dscp_map(const struct command *cmd, int argc, char *const *argv
 		return 0;
 	}
 
-	return lan966x_qos_genl_dscp_prio_dpl_set(dscp, &cfg);
+	return mchp_qos_genl_dscp_prio_dpl_set(dscp, &cfg);
 }
 
 static int cmd_i_def(const struct command *cmd, int argc, char *const *argv)
@@ -435,8 +435,8 @@ static int cmd_i_def(const struct command *cmd, int argc, char *const *argv)
 		{"help", no_argument, NULL, 'h'},
 		{NULL, 0, NULL, 0}
 	};
-	struct lan966x_qos_port_conf cfg = {};
-	struct lan966x_qos_port_conf tmp;
+	struct mchp_qos_port_conf cfg = {};
+	struct mchp_qos_port_conf tmp;
 	int do_help = 0;
 	u32 ifindex = 0;
 	int ch;
@@ -448,7 +448,7 @@ static int cmd_i_def(const struct command *cmd, int argc, char *const *argv)
 		return 1;
 	}
 
-	if (lan966x_qos_genl_port_cfg_get(ifindex, &cfg) < 0)
+	if (mchp_qos_genl_port_cfg_get(ifindex, &cfg) < 0)
 		return 0;
 
 	memcpy(&tmp, &cfg, sizeof(cfg));
@@ -485,7 +485,7 @@ static int cmd_i_def(const struct command *cmd, int argc, char *const *argv)
 		return 0;
 	}
 
-	return lan966x_qos_genl_port_cfg_set(ifindex, &cfg);
+	return mchp_qos_genl_port_cfg_set(ifindex, &cfg);
 }
 
 static int cmd_i_mode(const struct command *cmd, int argc, char *const *argv)
@@ -497,8 +497,8 @@ static int cmd_i_mode(const struct command *cmd, int argc, char *const *argv)
 		{"help", no_argument, NULL, 'h'},
 		{NULL, 0, NULL, 0}
 	};
-	struct lan966x_qos_port_conf cfg = {};
-	struct lan966x_qos_port_conf tmp;
+	struct mchp_qos_port_conf cfg = {};
+	struct mchp_qos_port_conf tmp;
 	int do_help = 0;
 	u32 ifindex = 0;
 	int ch;
@@ -510,7 +510,7 @@ static int cmd_i_mode(const struct command *cmd, int argc, char *const *argv)
 		return 1;
 	}
 
-	if (lan966x_qos_genl_port_cfg_get(ifindex, &cfg) < 0)
+	if (mchp_qos_genl_port_cfg_get(ifindex, &cfg) < 0)
 		return 0;
 
 	memcpy(&tmp, &cfg, sizeof(cfg));
@@ -541,7 +541,7 @@ static int cmd_i_mode(const struct command *cmd, int argc, char *const *argv)
 		return 0;
 	}
 
-	return lan966x_qos_genl_port_cfg_set(ifindex, &cfg);
+	return mchp_qos_genl_port_cfg_set(ifindex, &cfg);
 }
 
 static int cmd_e_tag_map(const struct command *cmd, int argc, char *const *argv)
@@ -553,8 +553,8 @@ static int cmd_e_tag_map(const struct command *cmd, int argc, char *const *argv)
 		{"help", no_argument, NULL, 'h'},
 		{NULL, 0, NULL, 0}
 	};
-	struct lan966x_qos_port_conf cfg = {};
-	struct lan966x_qos_port_conf tmp;
+	struct mchp_qos_port_conf cfg = {};
+	struct mchp_qos_port_conf tmp;
 	int do_help = 0;
 	u32 ifindex = 0;
 	int ch, len, i;
@@ -566,7 +566,7 @@ static int cmd_e_tag_map(const struct command *cmd, int argc, char *const *argv)
 		return 1;
 	}
 
-	if (lan966x_qos_genl_port_cfg_get(ifindex, &cfg) < 0)
+	if (mchp_qos_genl_port_cfg_get(ifindex, &cfg) < 0)
 		return 0;
 
 	memcpy(&tmp, &cfg, sizeof(cfg));
@@ -636,7 +636,7 @@ static int cmd_e_tag_map(const struct command *cmd, int argc, char *const *argv)
 		return 0;
 	}
 
-	return lan966x_qos_genl_port_cfg_set(ifindex, &cfg);
+	return mchp_qos_genl_port_cfg_set(ifindex, &cfg);
 }
 
 static int cmd_e_def(const struct command *cmd, int argc, char *const *argv)
@@ -648,8 +648,8 @@ static int cmd_e_def(const struct command *cmd, int argc, char *const *argv)
 		{"help", no_argument, NULL, 'h'},
 		{NULL, 0, NULL, 0}
 	};
-	struct lan966x_qos_port_conf cfg = {};
-	struct lan966x_qos_port_conf tmp;
+	struct mchp_qos_port_conf cfg = {};
+	struct mchp_qos_port_conf tmp;
 	int do_help = 0;
 	u32 ifindex = 0;
 	int ch;
@@ -661,7 +661,7 @@ static int cmd_e_def(const struct command *cmd, int argc, char *const *argv)
 		return 1;
 	}
 
-	if (lan966x_qos_genl_port_cfg_get(ifindex, &cfg) < 0)
+	if (mchp_qos_genl_port_cfg_get(ifindex, &cfg) < 0)
 		return 0;
 
 	memcpy(&tmp, &cfg, sizeof(cfg));
@@ -692,7 +692,7 @@ static int cmd_e_def(const struct command *cmd, int argc, char *const *argv)
 		return 0;
 	}
 
-	return lan966x_qos_genl_port_cfg_set(ifindex, &cfg);
+	return mchp_qos_genl_port_cfg_set(ifindex, &cfg);
 }
 
 static int cmd_e_mode(const struct command *cmd, int argc, char *const *argv)
@@ -705,8 +705,8 @@ static int cmd_e_mode(const struct command *cmd, int argc, char *const *argv)
 		{"help", no_argument, NULL, 'h'},
 		{NULL, 0, NULL, 0}
 	};
-	struct lan966x_qos_port_conf cfg = {};
-	struct lan966x_qos_port_conf tmp;
+	struct mchp_qos_port_conf cfg = {};
+	struct mchp_qos_port_conf tmp;
 	int do_help = 0;
 	u32 ifindex = 0;
 	int ch;
@@ -718,7 +718,7 @@ static int cmd_e_mode(const struct command *cmd, int argc, char *const *argv)
 		return 1;
 	}
 
-	if (lan966x_qos_genl_port_cfg_get(ifindex, &cfg) < 0)
+	if (mchp_qos_genl_port_cfg_get(ifindex, &cfg) < 0)
 		return 0;
 
 	memcpy(&tmp, &cfg, sizeof(cfg));
@@ -726,13 +726,13 @@ static int cmd_e_mode(const struct command *cmd, int argc, char *const *argv)
 	while ((ch = getopt_long(argc, argv, "a:b:h", long_options, NULL)) != -1) {
 		switch (ch) {
 		case 'a':
-			cfg.e_mode = LAN966X_E_MODE_DEFAULT;
+			cfg.e_mode = MCHP_E_MODE_DEFAULT;
 			break;
 		case 'b':
-			cfg.e_mode = LAN966X_E_MODE_CLASSIFIED;
+			cfg.e_mode = MCHP_E_MODE_CLASSIFIED;
 			break;
 		case 'c':
-			cfg.e_mode = LAN966X_E_MODE_MAPPED;
+			cfg.e_mode = MCHP_E_MODE_MAPPED;
 			break;
 		case 'h':
 		case '?':
@@ -748,13 +748,13 @@ static int cmd_e_mode(const struct command *cmd, int argc, char *const *argv)
 
 	if (memcmp(&tmp, &cfg, sizeof(cfg)) == 0) {
 		printf("e_mode --default %u --classified %u --mapped %u\n",
-		       (cfg.e_mode == LAN966X_E_MODE_DEFAULT) ? 1 : 0,
-		       (cfg.e_mode == LAN966X_E_MODE_CLASSIFIED) ? 1 : 0,
-		       (cfg.e_mode == LAN966X_E_MODE_MAPPED) ? 1 : 0);
+		       (cfg.e_mode == MCHP_E_MODE_DEFAULT) ? 1 : 0,
+		       (cfg.e_mode == MCHP_E_MODE_CLASSIFIED) ? 1 : 0,
+		       (cfg.e_mode == MCHP_E_MODE_MAPPED) ? 1 : 0);
 		return 0;
 	}
 
-	return lan966x_qos_genl_port_cfg_set(ifindex, &cfg);
+	return mchp_qos_genl_port_cfg_set(ifindex, &cfg);
 }
 
 /* commands */

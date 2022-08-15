@@ -8,7 +8,7 @@
 #include <errno.h>
 #include <net/if.h>
 #include "kernel_types.h"
-#include "lan966x_ui_qos.h"
+#include "mchp_ui_qos.h"
 
 struct command
 {
@@ -21,31 +21,31 @@ struct command
 
 static void command_help(const struct command *cmd);
 
-static struct nla_policy lan966x_frer_genl_policy[LAN966X_FRER_ATTR_END] = {
-	[LAN966X_FRER_ATTR_NONE] = { .type = NLA_UNSPEC },
-	[LAN966X_FRER_ATTR_ID] = { .type = NLA_U32 },
-	[LAN966X_FRER_ATTR_DEV1] = { .type = NLA_U32 },
-	[LAN966X_FRER_ATTR_DEV2] = { .type = NLA_U32 },
-	[LAN966X_FRER_ATTR_STREAM_CFG] = { .type = NLA_BINARY },
-	[LAN966X_FRER_ATTR_STREAM_CNT] = { .type = NLA_BINARY },
-	[LAN966X_FRER_ATTR_IFLOW_CFG] = { .type = NLA_BINARY },
-	[LAN966X_FRER_ATTR_VLAN_CFG] = { .type = NLA_BINARY },
+static struct nla_policy mchp_frer_genl_policy[MCHP_FRER_ATTR_END] = {
+	[MCHP_FRER_ATTR_NONE] = { .type = NLA_UNSPEC },
+	[MCHP_FRER_ATTR_ID] = { .type = NLA_U32 },
+	[MCHP_FRER_ATTR_DEV1] = { .type = NLA_U32 },
+	[MCHP_FRER_ATTR_DEV2] = { .type = NLA_U32 },
+	[MCHP_FRER_ATTR_STREAM_CFG] = { .type = NLA_BINARY },
+	[MCHP_FRER_ATTR_STREAM_CNT] = { .type = NLA_BINARY },
+	[MCHP_FRER_ATTR_IFLOW_CFG] = { .type = NLA_BINARY },
+	[MCHP_FRER_ATTR_VLAN_CFG] = { .type = NLA_BINARY },
 };
 
 /* cmd_cs */
-static int lan966x_frer_genl_cs_cfg_set(u32 cs_id,
-					const struct lan966x_frer_stream_cfg *cfg)
+static int mchp_frer_genl_cs_cfg_set(u32 cs_id,
+					const struct mchp_frer_stream_cfg *cfg)
 {
 	RETURN_IF_PC;
 	struct nl_sock *sk;
 	struct nl_msg *msg;
 	int rc = 0;
 
-	rc = lan966x_genl_start(LAN966X_FRER_NETLINK,
-				LAN966X_FRER_GENL_CS_CFG_SET, 1, &sk, &msg);
+	rc = mchp_genl_start(MCHP_FRER_NETLINK,
+				MCHP_FRER_GENL_CS_CFG_SET, 1, &sk, &msg);
 
-	NLA_PUT_U32(msg, LAN966X_FRER_ATTR_ID, cs_id);
-	NLA_PUT(msg, LAN966X_FRER_ATTR_STREAM_CFG, sizeof(*cfg), cfg);
+	NLA_PUT_U32(msg, MCHP_FRER_ATTR_ID, cs_id);
+	NLA_PUT(msg, MCHP_FRER_ATTR_STREAM_CFG, sizeof(*cfg), cfg);
 
 	rc = nl_send_auto(sk, msg);
 	if (rc < 0) {
@@ -65,45 +65,45 @@ nla_put_failure:
 	return rc;
 }
 
-static int lan966x_frer_genl_cs_cfg_get_cb(struct nl_msg *msg, void *arg)
+static int mchp_frer_genl_cs_cfg_get_cb(struct nl_msg *msg, void *arg)
 {
 	struct genlmsghdr *hdr = nlmsg_data(nlmsg_hdr(msg));
-	struct nlattr *attrs[LAN966X_FRER_ATTR_END];
-	struct lan966x_frer_stream_cfg *cfg = arg;
+	struct nlattr *attrs[MCHP_FRER_ATTR_END];
+	struct mchp_frer_stream_cfg *cfg = arg;
 
-	if (nla_parse(attrs, LAN966X_FRER_ATTR_MAX, genlmsg_attrdata(hdr, 0),
-		      genlmsg_attrlen(hdr, 0), lan966x_frer_genl_policy)) {
+	if (nla_parse(attrs, MCHP_FRER_ATTR_MAX, genlmsg_attrdata(hdr, 0),
+		      genlmsg_attrlen(hdr, 0), mchp_frer_genl_policy)) {
 		printf("nla_parse() failed\n");
 		return NL_STOP;
 	}
 
-	if (!attrs[LAN966X_FRER_ATTR_STREAM_CFG]) {
+	if (!attrs[MCHP_FRER_ATTR_STREAM_CFG]) {
 		printf("ATTR_STREAM_CFG not found\n");
 		return -1;
 	}
 
-	nla_memcpy(cfg, attrs[LAN966X_FRER_ATTR_STREAM_CFG],
-		   sizeof(struct lan966x_frer_stream_cfg));
+	nla_memcpy(cfg, attrs[MCHP_FRER_ATTR_STREAM_CFG],
+		   sizeof(struct mchp_frer_stream_cfg));
 
 	return NL_OK;
 }
 
-static int lan966x_frer_genl_cs_cfg_get(u32 cs_id,
-					struct lan966x_frer_stream_cfg *cfg)
+static int mchp_frer_genl_cs_cfg_get(u32 cs_id,
+					struct mchp_frer_stream_cfg *cfg)
 {
 	RETURN_IF_PC;
-	struct lan966x_frer_stream_cfg tmp;
+	struct mchp_frer_stream_cfg tmp;
 	struct nl_sock *sk;
 	struct nl_msg *msg;
 	int rc = 0;
 
-	rc = lan966x_genl_start(LAN966X_FRER_NETLINK,
-				LAN966X_FRER_GENL_CS_CFG_GET, 1, &sk, &msg);
+	rc = mchp_genl_start(MCHP_FRER_NETLINK,
+				MCHP_FRER_GENL_CS_CFG_GET, 1, &sk, &msg);
 
 	nl_socket_modify_cb(sk, NL_CB_VALID, NL_CB_CUSTOM,
-			    lan966x_frer_genl_cs_cfg_get_cb, &tmp);
+			    mchp_frer_genl_cs_cfg_get_cb, &tmp);
 
-	NLA_PUT_U32(msg, LAN966X_FRER_ATTR_ID, cs_id);
+	NLA_PUT_U32(msg, MCHP_FRER_ATTR_ID, cs_id);
 
 	rc = nl_send_auto(sk, msg);
 	if (rc < 0) {
@@ -127,44 +127,44 @@ nla_put_failure:
 	return rc;
 }
 
-static int lan966x_frer_genl_cs_cnt_get_cb(struct nl_msg *msg, void *arg)
+static int mchp_frer_genl_cs_cnt_get_cb(struct nl_msg *msg, void *arg)
 {
 	struct genlmsghdr *hdr = nlmsg_data(nlmsg_hdr(msg));
-	struct nlattr *attrs[LAN966X_FRER_ATTR_END];
-	struct lan966x_frer_cnt *cnt = arg;
+	struct nlattr *attrs[MCHP_FRER_ATTR_END];
+	struct mchp_frer_cnt *cnt = arg;
 
-	if (nla_parse(attrs, LAN966X_FRER_ATTR_MAX, genlmsg_attrdata(hdr, 0),
-		      genlmsg_attrlen(hdr, 0), lan966x_frer_genl_policy)) {
+	if (nla_parse(attrs, MCHP_FRER_ATTR_MAX, genlmsg_attrdata(hdr, 0),
+		      genlmsg_attrlen(hdr, 0), mchp_frer_genl_policy)) {
 		printf("nla_parse() failed\n");
 		return NL_STOP;
 	}
 
-	if (!attrs[LAN966X_FRER_ATTR_STREAM_CNT]) {
+	if (!attrs[MCHP_FRER_ATTR_STREAM_CNT]) {
 		printf("ATTR_STREAM_CNT not found\n");
 		return -1;
 	}
 
-	nla_memcpy(cnt, attrs[LAN966X_FRER_ATTR_STREAM_CNT],
-		   sizeof(struct lan966x_frer_cnt));
+	nla_memcpy(cnt, attrs[MCHP_FRER_ATTR_STREAM_CNT],
+		   sizeof(struct mchp_frer_cnt));
 
 	return NL_OK;
 }
 
-static int lan966x_frer_genl_cs_cnt_get(u32 cs_id, struct lan966x_frer_cnt *cnt)
+static int mchp_frer_genl_cs_cnt_get(u32 cs_id, struct mchp_frer_cnt *cnt)
 {
 	RETURN_IF_PC;
-	struct lan966x_frer_cnt tmp;
+	struct mchp_frer_cnt tmp;
 	struct nl_sock *sk;
 	struct nl_msg *msg;
 	int rc = 0;
 
-	rc = lan966x_genl_start(LAN966X_FRER_NETLINK,
-				LAN966X_FRER_GENL_CS_CNT_GET, 1, &sk, &msg);
+	rc = mchp_genl_start(MCHP_FRER_NETLINK,
+				MCHP_FRER_GENL_CS_CNT_GET, 1, &sk, &msg);
 
 	nl_socket_modify_cb(sk, NL_CB_VALID, NL_CB_CUSTOM,
-			    lan966x_frer_genl_cs_cnt_get_cb, &tmp);
+			    mchp_frer_genl_cs_cnt_get_cb, &tmp);
 
-	NLA_PUT_U32(msg, LAN966X_FRER_ATTR_ID, cs_id);
+	NLA_PUT_U32(msg, MCHP_FRER_ATTR_ID, cs_id);
 
 	rc = nl_send_auto(sk, msg);
 	if (rc < 0) {
@@ -188,17 +188,17 @@ nla_put_failure:
 	return rc;
 }
 
-static int lan966x_frer_genl_cs_cnt_clr(u32 cs_id)
+static int mchp_frer_genl_cs_cnt_clr(u32 cs_id)
 {
 	RETURN_IF_PC;
 	struct nl_sock *sk;
 	struct nl_msg *msg;
 	int rc = 0;
 
-	rc = lan966x_genl_start(LAN966X_FRER_NETLINK,
-				LAN966X_FRER_GENL_CS_CNT_CLR, 1, &sk, &msg);
+	rc = mchp_genl_start(MCHP_FRER_NETLINK,
+				MCHP_FRER_GENL_CS_CNT_CLR, 1, &sk, &msg);
 
-	NLA_PUT_U32(msg, LAN966X_FRER_ATTR_ID, cs_id);
+	NLA_PUT_U32(msg, MCHP_FRER_ATTR_ID, cs_id);
 
 	rc = nl_send_auto(sk, msg);
 	if (rc < 0) {
@@ -218,7 +218,7 @@ nla_put_failure:
 	return rc;
 }
 
-static char *lan966x_frer_cs_help(void)
+static char *mchp_frer_cs_help(void)
 {
 	return "--enable:                 Enable recovery\n"
 		" --alg:                    frerSeqRcvyAlgorithm (0: Vector, 1: Match)\n"
@@ -244,9 +244,9 @@ static int cmd_cs(const struct command *cmd, int argc, char *const *argv)
 		{"help", no_argument, NULL, 'h'},
 		{NULL, 0, NULL, 0}
 	};
-	struct lan966x_frer_stream_cfg cfg = {};
-	struct lan966x_frer_stream_cfg tmp;
-	struct lan966x_frer_cnt cnt = {};
+	struct mchp_frer_stream_cfg cfg = {};
+	struct mchp_frer_stream_cfg tmp;
+	struct mchp_frer_cnt cnt = {};
 	int do_help = 0;
 	int do_cnt = 0;
 	int do_clr = 0;
@@ -256,7 +256,7 @@ static int cmd_cs(const struct command *cmd, int argc, char *const *argv)
 	/* read the id */
 	cs_id = atoi(argv[0]);
 
-	if (lan966x_frer_genl_cs_cfg_get(cs_id, &cfg) < 0)
+	if (mchp_frer_genl_cs_cfg_get(cs_id, &cfg) < 0)
 		return 0;
 
 	memcpy(&tmp, &cfg, sizeof(cfg));
@@ -297,7 +297,7 @@ static int cmd_cs(const struct command *cmd, int argc, char *const *argv)
 	}
 			
 	if (do_cnt) {
-		rc = lan966x_frer_genl_cs_cnt_get(cs_id, &cnt);
+		rc = mchp_frer_genl_cs_cnt_get(cs_id, &cnt);
 		if (rc == 0) {
 			printf("%-18s: %16" PRIu64 "\n", "OutOfOrderPackets", cnt.out_of_order_packets);
 			printf("%-18s: %16" PRIu64 "\n", "RoguePackets", cnt.rogue_packets);
@@ -311,7 +311,7 @@ static int cmd_cs(const struct command *cmd, int argc, char *const *argv)
 	}
 
 	if (do_clr)
-		return lan966x_frer_genl_cs_cnt_clr(cs_id);
+		return mchp_frer_genl_cs_cnt_clr(cs_id);
 
 	if (memcmp(&tmp, &cfg, sizeof(cfg)) == 0) {
 		printf("%-14s %8d\n", "enable:", cfg.enable);
@@ -322,33 +322,33 @@ static int cmd_cs(const struct command *cmd, int argc, char *const *argv)
 		return 0;
 	}
 
-	return lan966x_frer_genl_cs_cfg_set(cs_id, &cfg);
+	return mchp_frer_genl_cs_cfg_set(cs_id, &cfg);
 }
 
 /* cmd_msa */
-static int lan966x_frer_genl_ms_alloc_cb(struct nl_msg *msg, void *arg)
+static int mchp_frer_genl_ms_alloc_cb(struct nl_msg *msg, void *arg)
 {
 	struct genlmsghdr *hdr = nlmsg_data(nlmsg_hdr(msg));
-	struct nlattr *attrs[LAN966X_FRER_ATTR_END];
+	struct nlattr *attrs[MCHP_FRER_ATTR_END];
 	u32 *id = arg;
 
-	if (nla_parse(attrs, LAN966X_FRER_ATTR_MAX, genlmsg_attrdata(hdr, 0),
-		      genlmsg_attrlen(hdr, 0), lan966x_frer_genl_policy)) {
+	if (nla_parse(attrs, MCHP_FRER_ATTR_MAX, genlmsg_attrdata(hdr, 0),
+		      genlmsg_attrlen(hdr, 0), mchp_frer_genl_policy)) {
 		printf("nla_parse() failed\n");
 		return NL_STOP;
 	}
 
-	if (!attrs[LAN966X_FRER_ATTR_ID]) {
+	if (!attrs[MCHP_FRER_ATTR_ID]) {
 		printf("ATTR_ID not found\n");
 		return -1;
 	}
 
-	*id = nla_get_u32(attrs[LAN966X_FRER_ATTR_ID]);
+	*id = nla_get_u32(attrs[MCHP_FRER_ATTR_ID]);
 
 	return NL_OK;
 }
 
-static int lan966x_frer_genl_ms_alloc(u32 ifindex1, u32 ifindex2, u32 *ms_id)
+static int mchp_frer_genl_ms_alloc(u32 ifindex1, u32 ifindex2, u32 *ms_id)
 {
 	RETURN_IF_PC;
 	struct nl_sock *sk;
@@ -356,14 +356,14 @@ static int lan966x_frer_genl_ms_alloc(u32 ifindex1, u32 ifindex2, u32 *ms_id)
 	int rc = 0;
 	u32 tmp;
 
-	rc = lan966x_genl_start(LAN966X_FRER_NETLINK,
-			     LAN966X_FRER_GENL_MS_ALLOC, 1, &sk, &msg);
+	rc = mchp_genl_start(MCHP_FRER_NETLINK,
+			     MCHP_FRER_GENL_MS_ALLOC, 1, &sk, &msg);
 
 	nl_socket_modify_cb(sk, NL_CB_VALID, NL_CB_CUSTOM,
-			    lan966x_frer_genl_ms_alloc_cb, &tmp);
+			    mchp_frer_genl_ms_alloc_cb, &tmp);
 
-	NLA_PUT_U32(msg, LAN966X_FRER_ATTR_DEV1, ifindex1);
-	NLA_PUT_U32(msg, LAN966X_FRER_ATTR_DEV2, ifindex2);
+	NLA_PUT_U32(msg, MCHP_FRER_ATTR_DEV1, ifindex1);
+	NLA_PUT_U32(msg, MCHP_FRER_ATTR_DEV2, ifindex2);
 
 	rc = nl_send_auto(sk, msg);
 	if (rc < 0) {
@@ -387,7 +387,7 @@ nla_put_failure:
 	return rc;
 }
 
-static char *lan966x_frer_msa_help(void)
+static char *mchp_frer_msa_help(void)
 {
 	return "--help:                   Show this help text\n";
 }
@@ -437,7 +437,7 @@ static int cmd_msa(const struct command *cmd, int argc, char *const *argv)
 		return 0;
 	}
 			
-	rc = lan966x_frer_genl_ms_alloc(ifindex1, ifindex2, &ms_id);
+	rc = mchp_frer_genl_ms_alloc(ifindex1, ifindex2, &ms_id);
 	if (rc == 0) {
 		printf("%u\n", ms_id);
 	}
@@ -445,17 +445,17 @@ static int cmd_msa(const struct command *cmd, int argc, char *const *argv)
 }
 
 /* cmd_msf */
-static int lan966x_frer_genl_ms_free(u32 ms_id)
+static int mchp_frer_genl_ms_free(u32 ms_id)
 {
 	RETURN_IF_PC;
 	struct nl_sock *sk;
 	struct nl_msg *msg;
 	int rc = 0;
 
-	rc = lan966x_genl_start(LAN966X_FRER_NETLINK,
-				LAN966X_FRER_GENL_MS_FREE, 1, &sk, &msg);
+	rc = mchp_genl_start(MCHP_FRER_NETLINK,
+				MCHP_FRER_GENL_MS_FREE, 1, &sk, &msg);
 
-	NLA_PUT_U32(msg, LAN966X_FRER_ATTR_ID, ms_id);
+	NLA_PUT_U32(msg, MCHP_FRER_ATTR_ID, ms_id);
 
 	rc = nl_send_auto(sk, msg);
 	if (rc < 0) {
@@ -475,7 +475,7 @@ nla_put_failure:
 	return rc;
 }
 
-static char *lan966x_frer_msf_help(void)
+static char *mchp_frer_msf_help(void)
 {
 	return "--help:                   Show this help text\n";
 }
@@ -508,24 +508,24 @@ static int cmd_msf(const struct command *cmd, int argc, char *const *argv)
 		return 0;
 	}
 			
-	return lan966x_frer_genl_ms_free(ms_id);
+	return mchp_frer_genl_ms_free(ms_id);
 }
 
 /* cmd_ms */
-static int lan966x_frer_genl_ms_cfg_set(u32 ifindex, u32 ms_id,
-					const struct lan966x_frer_stream_cfg *cfg)
+static int mchp_frer_genl_ms_cfg_set(u32 ifindex, u32 ms_id,
+					const struct mchp_frer_stream_cfg *cfg)
 {
 	RETURN_IF_PC;
 	struct nl_sock *sk;
 	struct nl_msg *msg;
 	int rc = 0;
 
-	rc = lan966x_genl_start(LAN966X_FRER_NETLINK,
-				LAN966X_FRER_GENL_MS_CFG_SET, 1, &sk, &msg);
+	rc = mchp_genl_start(MCHP_FRER_NETLINK,
+				MCHP_FRER_GENL_MS_CFG_SET, 1, &sk, &msg);
 
-	NLA_PUT_U32(msg, LAN966X_FRER_ATTR_ID, ms_id);
-	NLA_PUT_U32(msg, LAN966X_FRER_ATTR_DEV1, ifindex);
-	NLA_PUT(msg, LAN966X_FRER_ATTR_STREAM_CFG, sizeof(*cfg), cfg);
+	NLA_PUT_U32(msg, MCHP_FRER_ATTR_ID, ms_id);
+	NLA_PUT_U32(msg, MCHP_FRER_ATTR_DEV1, ifindex);
+	NLA_PUT(msg, MCHP_FRER_ATTR_STREAM_CFG, sizeof(*cfg), cfg);
 
 	rc = nl_send_auto(sk, msg);
 	if (rc < 0) {
@@ -545,46 +545,46 @@ nla_put_failure:
 	return rc;
 }
 
-static int lan966x_frer_genl_ms_cfg_get_cb(struct nl_msg *msg, void *arg)
+static int mchp_frer_genl_ms_cfg_get_cb(struct nl_msg *msg, void *arg)
 {
 	struct genlmsghdr *hdr = nlmsg_data(nlmsg_hdr(msg));
-	struct nlattr *attrs[LAN966X_FRER_ATTR_END];
-	struct lan966x_frer_stream_cfg *cfg = arg;
+	struct nlattr *attrs[MCHP_FRER_ATTR_END];
+	struct mchp_frer_stream_cfg *cfg = arg;
 
-	if (nla_parse(attrs, LAN966X_FRER_ATTR_MAX, genlmsg_attrdata(hdr, 0),
-		      genlmsg_attrlen(hdr, 0), lan966x_frer_genl_policy)) {
+	if (nla_parse(attrs, MCHP_FRER_ATTR_MAX, genlmsg_attrdata(hdr, 0),
+		      genlmsg_attrlen(hdr, 0), mchp_frer_genl_policy)) {
 		printf("nla_parse() failed\n");
 		return NL_STOP;
 	}
 
-	if (!attrs[LAN966X_FRER_ATTR_STREAM_CFG]) {
+	if (!attrs[MCHP_FRER_ATTR_STREAM_CFG]) {
 		printf("ATTR_STREAM_CFG not found\n");
 		return -1;
 	}
 
-	nla_memcpy(cfg, attrs[LAN966X_FRER_ATTR_STREAM_CFG],
-		   sizeof(struct lan966x_frer_stream_cfg));
+	nla_memcpy(cfg, attrs[MCHP_FRER_ATTR_STREAM_CFG],
+		   sizeof(struct mchp_frer_stream_cfg));
 
 	return NL_OK;
 }
 
-static int lan966x_frer_genl_ms_cfg_get(u32 ifindex, u32 ms_id,
-					struct lan966x_frer_stream_cfg *cfg)
+static int mchp_frer_genl_ms_cfg_get(u32 ifindex, u32 ms_id,
+					struct mchp_frer_stream_cfg *cfg)
 {
 	RETURN_IF_PC;
-	struct lan966x_frer_stream_cfg tmp;
+	struct mchp_frer_stream_cfg tmp;
 	struct nl_sock *sk;
 	struct nl_msg *msg;
 	int rc = 0;
 
-	rc = lan966x_genl_start(LAN966X_FRER_NETLINK,
-				LAN966X_FRER_GENL_MS_CFG_GET, 1, &sk, &msg);
+	rc = mchp_genl_start(MCHP_FRER_NETLINK,
+				MCHP_FRER_GENL_MS_CFG_GET, 1, &sk, &msg);
 
 	nl_socket_modify_cb(sk, NL_CB_VALID, NL_CB_CUSTOM,
-			    lan966x_frer_genl_ms_cfg_get_cb, &tmp);
+			    mchp_frer_genl_ms_cfg_get_cb, &tmp);
 
-	NLA_PUT_U32(msg, LAN966X_FRER_ATTR_ID, ms_id);
-	NLA_PUT_U32(msg, LAN966X_FRER_ATTR_DEV1, ifindex);
+	NLA_PUT_U32(msg, MCHP_FRER_ATTR_ID, ms_id);
+	NLA_PUT_U32(msg, MCHP_FRER_ATTR_DEV1, ifindex);
 
 	rc = nl_send_auto(sk, msg);
 	if (rc < 0) {
@@ -608,45 +608,45 @@ nla_put_failure:
 	return rc;
 }
 
-static int lan966x_frer_genl_ms_cnt_get_cb(struct nl_msg *msg, void *arg)
+static int mchp_frer_genl_ms_cnt_get_cb(struct nl_msg *msg, void *arg)
 {
 	struct genlmsghdr *hdr = nlmsg_data(nlmsg_hdr(msg));
-	struct nlattr *attrs[LAN966X_FRER_ATTR_END];
-	struct lan966x_frer_cnt *cnt = arg;
+	struct nlattr *attrs[MCHP_FRER_ATTR_END];
+	struct mchp_frer_cnt *cnt = arg;
 
-	if (nla_parse(attrs, LAN966X_FRER_ATTR_MAX, genlmsg_attrdata(hdr, 0),
-		      genlmsg_attrlen(hdr, 0), lan966x_frer_genl_policy)) {
+	if (nla_parse(attrs, MCHP_FRER_ATTR_MAX, genlmsg_attrdata(hdr, 0),
+		      genlmsg_attrlen(hdr, 0), mchp_frer_genl_policy)) {
 		printf("nla_parse() failed\n");
 		return NL_STOP;
 	}
 
-	if (!attrs[LAN966X_FRER_ATTR_STREAM_CNT]) {
+	if (!attrs[MCHP_FRER_ATTR_STREAM_CNT]) {
 		printf("ATTR_STREAM_CNT not found\n");
 		return -1;
 	}
 
-	nla_memcpy(cnt, attrs[LAN966X_FRER_ATTR_STREAM_CNT],
-		   sizeof(struct lan966x_frer_cnt));
+	nla_memcpy(cnt, attrs[MCHP_FRER_ATTR_STREAM_CNT],
+		   sizeof(struct mchp_frer_cnt));
 
 	return NL_OK;
 }
 
-static int lan966x_frer_genl_ms_cnt_get(u32 ifindex, u32 ms_id, struct lan966x_frer_cnt *cnt)
+static int mchp_frer_genl_ms_cnt_get(u32 ifindex, u32 ms_id, struct mchp_frer_cnt *cnt)
 {
 	RETURN_IF_PC;
-	struct lan966x_frer_cnt tmp;
+	struct mchp_frer_cnt tmp;
 	struct nl_sock *sk;
 	struct nl_msg *msg;
 	int rc = 0;
 
-	rc = lan966x_genl_start(LAN966X_FRER_NETLINK,
-				LAN966X_FRER_GENL_MS_CNT_GET, 1, &sk, &msg);
+	rc = mchp_genl_start(MCHP_FRER_NETLINK,
+				MCHP_FRER_GENL_MS_CNT_GET, 1, &sk, &msg);
 
 	nl_socket_modify_cb(sk, NL_CB_VALID, NL_CB_CUSTOM,
-			    lan966x_frer_genl_ms_cnt_get_cb, &tmp);
+			    mchp_frer_genl_ms_cnt_get_cb, &tmp);
 
-	NLA_PUT_U32(msg, LAN966X_FRER_ATTR_ID, ms_id);
-	NLA_PUT_U32(msg, LAN966X_FRER_ATTR_DEV1, ifindex);
+	NLA_PUT_U32(msg, MCHP_FRER_ATTR_ID, ms_id);
+	NLA_PUT_U32(msg, MCHP_FRER_ATTR_DEV1, ifindex);
 
 	rc = nl_send_auto(sk, msg);
 	if (rc < 0) {
@@ -670,18 +670,18 @@ nla_put_failure:
 	return rc;
 }
 
-static int lan966x_frer_genl_ms_cnt_clr(u32 ifindex, u32 ms_id)
+static int mchp_frer_genl_ms_cnt_clr(u32 ifindex, u32 ms_id)
 {
 	RETURN_IF_PC;
 	struct nl_sock *sk;
 	struct nl_msg *msg;
 	int rc = 0;
 
-	rc = lan966x_genl_start(LAN966X_FRER_NETLINK,
-				LAN966X_FRER_GENL_MS_CNT_CLR, 1, &sk, &msg);
+	rc = mchp_genl_start(MCHP_FRER_NETLINK,
+				MCHP_FRER_GENL_MS_CNT_CLR, 1, &sk, &msg);
 
-	NLA_PUT_U32(msg, LAN966X_FRER_ATTR_ID, ms_id);
-	NLA_PUT_U32(msg, LAN966X_FRER_ATTR_DEV1, ifindex);
+	NLA_PUT_U32(msg, MCHP_FRER_ATTR_ID, ms_id);
+	NLA_PUT_U32(msg, MCHP_FRER_ATTR_DEV1, ifindex);
 
 	rc = nl_send_auto(sk, msg);
 	if (rc < 0) {
@@ -701,7 +701,7 @@ nla_put_failure:
 	return rc;
 }
 
-static char *lan966x_frer_ms_help(void)
+static char *mchp_frer_ms_help(void)
 {
 	return "--enable:                 Enable recovery\n"
 		" --alg:                    frerSeqRcvyAlgorithm (0: Vector, 1: Match)\n"
@@ -729,9 +729,9 @@ static int cmd_ms(const struct command *cmd, int argc, char *const *argv)
 		{"clr", no_argument, NULL, 'i'},
 		{NULL, 0, NULL, 0}
 	};
-	struct lan966x_frer_cnt cnt = {};
-	struct lan966x_frer_stream_cfg cfg = {};
-	struct lan966x_frer_stream_cfg tmp;
+	struct mchp_frer_cnt cnt = {};
+	struct mchp_frer_stream_cfg cfg = {};
+	struct mchp_frer_stream_cfg tmp;
 	u32 ifindex = 0;
 	int do_help = 0;
 	int do_cnt = 0;
@@ -752,7 +752,7 @@ static int cmd_ms(const struct command *cmd, int argc, char *const *argv)
 	ms_id = atoi(argv[0]);
 
 
-	if (lan966x_frer_genl_ms_cfg_get(ifindex, ms_id, &cfg) < 0)
+	if (mchp_frer_genl_ms_cfg_get(ifindex, ms_id, &cfg) < 0)
 		return 0;
 
 	memcpy(&tmp, &cfg, sizeof(cfg));
@@ -796,7 +796,7 @@ static int cmd_ms(const struct command *cmd, int argc, char *const *argv)
 	}
 			
 	if (do_cnt) {
-		rc = lan966x_frer_genl_ms_cnt_get(ifindex, ms_id, &cnt);
+		rc = mchp_frer_genl_ms_cnt_get(ifindex, ms_id, &cnt);
 		if (rc == 0) {
 			printf("%-18s: %16" PRIu64 "\n", "OutOfOrderPackets", cnt.out_of_order_packets);
 			printf("%-18s: %16" PRIu64 "\n", "RoguePackets", cnt.rogue_packets);
@@ -810,7 +810,7 @@ static int cmd_ms(const struct command *cmd, int argc, char *const *argv)
 	}
 
 	if (do_clr)
-		return lan966x_frer_genl_ms_cnt_clr(ifindex, ms_id);
+		return mchp_frer_genl_ms_cnt_clr(ifindex, ms_id);
 
 	if (memcmp(&tmp, &cfg, sizeof(cfg)) == 0) {
 		printf("%-14s %8d\n", "enable:", cfg.enable);
@@ -822,32 +822,32 @@ static int cmd_ms(const struct command *cmd, int argc, char *const *argv)
 		return 0;
 	}
 
-	return lan966x_frer_genl_ms_cfg_set(ifindex, ms_id, &cfg);
+	return mchp_frer_genl_ms_cfg_set(ifindex, ms_id, &cfg);
 }
 
 /* cmd_iflow */
 /* Transfer split_mask out of band via DEV1 and DEV2 */
-struct lan966x_iflow_cmb_cfg {
-	struct lan966x_iflow_cfg iflow;
+struct mchp_iflow_cmb_cfg {
+	struct mchp_iflow_cfg iflow;
 	u32 ifindex1;
 	u32 ifindex2;
 };
 
-static int lan966x_frer_genl_iflow_cfg_set(u32 id,
-					   const struct lan966x_iflow_cmb_cfg *cfg)
+static int mchp_frer_genl_iflow_cfg_set(u32 id,
+					   const struct mchp_iflow_cmb_cfg *cfg)
 {
 	RETURN_IF_PC;
 	struct nl_sock *sk;
 	struct nl_msg *msg;
 	int rc = 0;
 
-	rc = lan966x_genl_start(LAN966X_FRER_NETLINK,
-				LAN966X_FRER_GENL_IFLOW_CFG_SET, 1, &sk, &msg);
+	rc = mchp_genl_start(MCHP_FRER_NETLINK,
+				MCHP_FRER_GENL_IFLOW_CFG_SET, 1, &sk, &msg);
 
-	NLA_PUT_U32(msg, LAN966X_FRER_ATTR_ID, id);
-	NLA_PUT_U32(msg, LAN966X_FRER_ATTR_DEV1, cfg->ifindex1);
-	NLA_PUT_U32(msg, LAN966X_FRER_ATTR_DEV2, cfg->ifindex2);
-	NLA_PUT(msg, LAN966X_FRER_ATTR_IFLOW_CFG, sizeof(cfg->iflow), &cfg->iflow);
+	NLA_PUT_U32(msg, MCHP_FRER_ATTR_ID, id);
+	NLA_PUT_U32(msg, MCHP_FRER_ATTR_DEV1, cfg->ifindex1);
+	NLA_PUT_U32(msg, MCHP_FRER_ATTR_DEV2, cfg->ifindex2);
+	NLA_PUT(msg, MCHP_FRER_ATTR_IFLOW_CFG, sizeof(cfg->iflow), &cfg->iflow);
 
 	rc = nl_send_auto(sk, msg);
 	if (rc < 0) {
@@ -867,57 +867,57 @@ nla_put_failure:
 	return rc;
 }
 
-static int lan966x_frer_genl_iflow_cfg_get_cb(struct nl_msg *msg, void *arg)
+static int mchp_frer_genl_iflow_cfg_get_cb(struct nl_msg *msg, void *arg)
 {
 	struct genlmsghdr *hdr = nlmsg_data(nlmsg_hdr(msg));
-	struct nlattr *attrs[LAN966X_FRER_ATTR_END];
-	struct lan966x_iflow_cmb_cfg *cfg = arg;
+	struct nlattr *attrs[MCHP_FRER_ATTR_END];
+	struct mchp_iflow_cmb_cfg *cfg = arg;
 
-	if (nla_parse(attrs, LAN966X_FRER_ATTR_MAX, genlmsg_attrdata(hdr, 0),
-		      genlmsg_attrlen(hdr, 0), lan966x_frer_genl_policy)) {
+	if (nla_parse(attrs, MCHP_FRER_ATTR_MAX, genlmsg_attrdata(hdr, 0),
+		      genlmsg_attrlen(hdr, 0), mchp_frer_genl_policy)) {
 		printf("nla_parse() failed\n");
 		return NL_STOP;
 	}
 
-	if (!attrs[LAN966X_FRER_ATTR_IFLOW_CFG]) {
+	if (!attrs[MCHP_FRER_ATTR_IFLOW_CFG]) {
 		printf("ATTR_IFLOW_CFG not found\n");
 		return -1;
 	}
 
-	if (!attrs[LAN966X_FRER_ATTR_DEV1]) {
+	if (!attrs[MCHP_FRER_ATTR_DEV1]) {
 		printf("ATTR_DEV1 not found\n");
 		return -1;
 	}
 
-	if (!attrs[LAN966X_FRER_ATTR_DEV2]) {
+	if (!attrs[MCHP_FRER_ATTR_DEV2]) {
 		printf("ATTR_DEV2 not found\n");
 		return -1;
 	}
 
-	nla_memcpy(&cfg->iflow, attrs[LAN966X_FRER_ATTR_IFLOW_CFG],
-		   sizeof(struct lan966x_iflow_cfg));
-	cfg->ifindex1 = nla_get_u32(attrs[LAN966X_FRER_ATTR_DEV1]);
-	cfg->ifindex2 = nla_get_u32(attrs[LAN966X_FRER_ATTR_DEV2]);
+	nla_memcpy(&cfg->iflow, attrs[MCHP_FRER_ATTR_IFLOW_CFG],
+		   sizeof(struct mchp_iflow_cfg));
+	cfg->ifindex1 = nla_get_u32(attrs[MCHP_FRER_ATTR_DEV1]);
+	cfg->ifindex2 = nla_get_u32(attrs[MCHP_FRER_ATTR_DEV2]);
 
 	return NL_OK;
 }
 
-static int lan966x_frer_genl_iflow_cfg_get(u32 id,
-					   struct lan966x_iflow_cmb_cfg *cfg)
+static int mchp_frer_genl_iflow_cfg_get(u32 id,
+					   struct mchp_iflow_cmb_cfg *cfg)
 {
 	RETURN_IF_PC;
-	struct lan966x_iflow_cmb_cfg tmp;
+	struct mchp_iflow_cmb_cfg tmp;
 	struct nl_sock *sk;
 	struct nl_msg *msg;
 	int rc = 0;
 
-	rc = lan966x_genl_start(LAN966X_FRER_NETLINK,
-				LAN966X_FRER_GENL_IFLOW_CFG_GET, 1, &sk, &msg);
+	rc = mchp_genl_start(MCHP_FRER_NETLINK,
+				MCHP_FRER_GENL_IFLOW_CFG_GET, 1, &sk, &msg);
 
 	nl_socket_modify_cb(sk, NL_CB_VALID, NL_CB_CUSTOM,
-			    lan966x_frer_genl_iflow_cfg_get_cb, &tmp);
+			    mchp_frer_genl_iflow_cfg_get_cb, &tmp);
 
-	NLA_PUT_U32(msg, LAN966X_FRER_ATTR_ID, id);
+	NLA_PUT_U32(msg, MCHP_FRER_ATTR_ID, id);
 
 	rc = nl_send_auto(sk, msg);
 	if (rc < 0) {
@@ -941,7 +941,7 @@ nla_put_failure:
 	return rc;
 }
 
-static char *lan966x_frer_iflow_help(void)
+static char *mchp_frer_iflow_help(void)
 {
 	return "--ms_enable:              Enable member stream\n"
 		" --ms_id:                  Allocated member stream ID\n"
@@ -965,8 +965,8 @@ static int cmd_iflow(const struct command *cmd, int argc, char *const *argv)
 		{"help", no_argument, NULL, 'h'},
 		{NULL, 0, NULL, 0}
 	};
-	struct lan966x_iflow_cmb_cfg cfg = {};
-	struct lan966x_iflow_cmb_cfg tmp;
+	struct mchp_iflow_cmb_cfg cfg = {};
+	struct mchp_iflow_cmb_cfg tmp;
 	int do_help = 0;
 	u32 id = 0;
 	int ch;
@@ -974,7 +974,7 @@ static int cmd_iflow(const struct command *cmd, int argc, char *const *argv)
 	/* read the id */
 	id = atoi(argv[0]);
 
-	if (lan966x_frer_genl_iflow_cfg_get(id, &cfg) < 0)
+	if (mchp_frer_genl_iflow_cfg_get(id, &cfg) < 0)
 		return 0;
 
 	memcpy(&tmp, &cfg, sizeof(cfg));
@@ -1043,23 +1043,23 @@ static int cmd_iflow(const struct command *cmd, int argc, char *const *argv)
 		return 0;
 	}
 
-	return lan966x_frer_genl_iflow_cfg_set(id, &cfg);
+	return mchp_frer_genl_iflow_cfg_set(id, &cfg);
 }
 
 /* cmd_vlan */
-static int lan966x_frer_genl_vlan_cfg_set(u32 vid,
-					  const struct lan966x_frer_vlan_cfg *cfg)
+static int mchp_frer_genl_vlan_cfg_set(u32 vid,
+					  const struct mchp_frer_vlan_cfg *cfg)
 {
 	RETURN_IF_PC;
 	struct nl_sock *sk;
 	struct nl_msg *msg;
 	int rc = 0;
 
-	rc = lan966x_genl_start(LAN966X_FRER_NETLINK,
-				LAN966X_FRER_GENL_VLAN_CFG_SET, 1, &sk, &msg);
+	rc = mchp_genl_start(MCHP_FRER_NETLINK,
+				MCHP_FRER_GENL_VLAN_CFG_SET, 1, &sk, &msg);
 
-	NLA_PUT_U32(msg, LAN966X_FRER_ATTR_ID, vid);
-	NLA_PUT(msg, LAN966X_FRER_ATTR_VLAN_CFG, sizeof(*cfg), cfg);
+	NLA_PUT_U32(msg, MCHP_FRER_ATTR_ID, vid);
+	NLA_PUT(msg, MCHP_FRER_ATTR_VLAN_CFG, sizeof(*cfg), cfg);
 
 	rc = nl_send_auto(sk, msg);
 	if (rc < 0) {
@@ -1079,45 +1079,45 @@ nla_put_failure:
 	return rc;
 }
 
-static int lan966x_frer_genl_vlan_cfg_get_cb(struct nl_msg *msg, void *arg)
+static int mchp_frer_genl_vlan_cfg_get_cb(struct nl_msg *msg, void *arg)
 {
 	struct genlmsghdr *hdr = nlmsg_data(nlmsg_hdr(msg));
-	struct nlattr *attrs[LAN966X_FRER_ATTR_END];
-	struct lan966x_frer_vlan_cfg *cfg = arg;
+	struct nlattr *attrs[MCHP_FRER_ATTR_END];
+	struct mchp_frer_vlan_cfg *cfg = arg;
 
-	if (nla_parse(attrs, LAN966X_FRER_ATTR_MAX, genlmsg_attrdata(hdr, 0),
-		      genlmsg_attrlen(hdr, 0), lan966x_frer_genl_policy)) {
+	if (nla_parse(attrs, MCHP_FRER_ATTR_MAX, genlmsg_attrdata(hdr, 0),
+		      genlmsg_attrlen(hdr, 0), mchp_frer_genl_policy)) {
 		printf("nla_parse() failed\n");
 		return NL_STOP;
 	}
 
-	if (!attrs[LAN966X_FRER_ATTR_VLAN_CFG]) {
+	if (!attrs[MCHP_FRER_ATTR_VLAN_CFG]) {
 		printf("ATTR_VLAN_CFG not found\n");
 		return -1;
 	}
 
-	nla_memcpy(cfg, attrs[LAN966X_FRER_ATTR_VLAN_CFG],
-		   sizeof(struct lan966x_frer_vlan_cfg));
+	nla_memcpy(cfg, attrs[MCHP_FRER_ATTR_VLAN_CFG],
+		   sizeof(struct mchp_frer_vlan_cfg));
 
 	return NL_OK;
 }
 
-static int lan966x_frer_genl_vlan_cfg_get(u32 vid,
-					  struct lan966x_frer_vlan_cfg *cfg)
+static int mchp_frer_genl_vlan_cfg_get(u32 vid,
+					  struct mchp_frer_vlan_cfg *cfg)
 {
 	RETURN_IF_PC;
-	struct lan966x_frer_vlan_cfg tmp;
+	struct mchp_frer_vlan_cfg tmp;
 	struct nl_sock *sk;
 	struct nl_msg *msg;
 	int rc = 0;
 
-	rc = lan966x_genl_start(LAN966X_FRER_NETLINK,
-				LAN966X_FRER_GENL_VLAN_CFG_GET, 1, &sk, &msg);
+	rc = mchp_genl_start(MCHP_FRER_NETLINK,
+				MCHP_FRER_GENL_VLAN_CFG_GET, 1, &sk, &msg);
 
 	nl_socket_modify_cb(sk, NL_CB_VALID, NL_CB_CUSTOM,
-			    lan966x_frer_genl_vlan_cfg_get_cb, &tmp);
+			    mchp_frer_genl_vlan_cfg_get_cb, &tmp);
 
-	NLA_PUT_U32(msg, LAN966X_FRER_ATTR_ID, vid);
+	NLA_PUT_U32(msg, MCHP_FRER_ATTR_ID, vid);
 
 	rc = nl_send_auto(sk, msg);
 	if (rc < 0) {
@@ -1141,7 +1141,7 @@ nla_put_failure:
 	return rc;
 }
 
-static char *lan966x_frer_vlan_help(void)
+static char *mchp_frer_vlan_help(void)
 {
 	return "--flood_disable:          Disable flooding in VLAN\n"
 		" --learn_disable:          Disable learning in VLAN\n"
@@ -1157,8 +1157,8 @@ static int cmd_vlan(const struct command *cmd, int argc, char *const *argv)
 		{"help", no_argument, NULL, 'h'},
 		{NULL, 0, NULL, 0}
 	};
-	struct lan966x_frer_vlan_cfg cfg = {};
-	struct lan966x_frer_vlan_cfg tmp;
+	struct mchp_frer_vlan_cfg cfg = {};
+	struct mchp_frer_vlan_cfg tmp;
 	int do_help = 0;
 	u32 vid = 0;
 	int ch;
@@ -1166,7 +1166,7 @@ static int cmd_vlan(const struct command *cmd, int argc, char *const *argv)
 	/* read the id */
 	vid = atoi(argv[0]);
 
-	if (lan966x_frer_genl_vlan_cfg_get(vid, &cfg) < 0)
+	if (mchp_frer_genl_vlan_cfg_get(vid, &cfg) < 0)
 		return 0;
 
 	memcpy(&tmp, &cfg, sizeof(cfg));
@@ -1197,18 +1197,18 @@ static int cmd_vlan(const struct command *cmd, int argc, char *const *argv)
 		return 0;
 	}
 
-	return lan966x_frer_genl_vlan_cfg_set(vid, &cfg);
+	return mchp_frer_genl_vlan_cfg_set(vid, &cfg);
 }
 
 /* commands */
 static const struct command commands[] =
 {
-	{1, "cs", cmd_cs, "cs cs_id [options]", lan966x_frer_cs_help},
-	{1, "msa", cmd_msa, "msa dev1 [dev2] [options]", lan966x_frer_msa_help},
-	{1, "msf", cmd_msf, "msf ms_id [options]", lan966x_frer_msf_help},
-	{2, "ms", cmd_ms, "ms dev ms_id [options]", lan966x_frer_ms_help},
-	{1, "iflow", cmd_iflow, "iflow id [options]", lan966x_frer_iflow_help},
-	{1, "vlan", cmd_vlan, "vlan vid [options]", lan966x_frer_vlan_help},
+	{1, "cs", cmd_cs, "cs cs_id [options]", mchp_frer_cs_help},
+	{1, "msa", cmd_msa, "msa dev1 [dev2] [options]", mchp_frer_msa_help},
+	{1, "msf", cmd_msf, "msf ms_id [options]", mchp_frer_msf_help},
+	{2, "ms", cmd_ms, "ms dev ms_id [options]", mchp_frer_ms_help},
+	{1, "iflow", cmd_iflow, "iflow id [options]", mchp_frer_iflow_help},
+	{1, "vlan", cmd_vlan, "vlan vid [options]", mchp_frer_vlan_help},
 };
 
 static void command_help(const struct command *cmd)
