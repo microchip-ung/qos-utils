@@ -43,6 +43,8 @@ static int mchp_frer_genl_cs_cfg_set(u32 cs_id,
 
 	rc = mchp_genl_start(MCHP_FRER_NETLINK,
 				MCHP_FRER_GENL_CS_CFG_SET, 1, &sk, &msg);
+	if (rc < 0)
+		return rc;
 
 	NLA_PUT_U32(msg, MCHP_FRER_ATTR_ID, cs_id);
 	NLA_PUT(msg, MCHP_FRER_ATTR_STREAM_CFG, sizeof(*cfg), cfg);
@@ -99,6 +101,8 @@ static int mchp_frer_genl_cs_cfg_get(u32 cs_id,
 
 	rc = mchp_genl_start(MCHP_FRER_NETLINK,
 				MCHP_FRER_GENL_CS_CFG_GET, 1, &sk, &msg);
+	if (rc < 0)
+		return rc;
 
 	nl_socket_modify_cb(sk, NL_CB_VALID, NL_CB_CUSTOM,
 			    mchp_frer_genl_cs_cfg_get_cb, &tmp);
@@ -160,6 +164,8 @@ static int mchp_frer_genl_cs_cnt_get(u32 cs_id, struct mchp_frer_cnt *cnt)
 
 	rc = mchp_genl_start(MCHP_FRER_NETLINK,
 				MCHP_FRER_GENL_CS_CNT_GET, 1, &sk, &msg);
+	if (rc < 0)
+		return rc;
 
 	nl_socket_modify_cb(sk, NL_CB_VALID, NL_CB_CUSTOM,
 			    mchp_frer_genl_cs_cnt_get_cb, &tmp);
@@ -197,6 +203,8 @@ static int mchp_frer_genl_cs_cnt_clr(u32 cs_id)
 
 	rc = mchp_genl_start(MCHP_FRER_NETLINK,
 				MCHP_FRER_GENL_CS_CNT_CLR, 1, &sk, &msg);
+	if (rc < 0)
+		return rc;
 
 	NLA_PUT_U32(msg, MCHP_FRER_ATTR_ID, cs_id);
 
@@ -295,7 +303,7 @@ static int cmd_cs(const struct command *cmd, int argc, char *const *argv)
 		command_help(cmd);
 		return 0;
 	}
-			
+
 	if (do_cnt) {
 		rc = mchp_frer_genl_cs_cnt_get(cs_id, &cnt);
 		if (rc == 0) {
@@ -358,6 +366,8 @@ static int mchp_frer_genl_ms_alloc(u32 ifindex1, u32 ifindex2, u32 *ms_id)
 
 	rc = mchp_genl_start(MCHP_FRER_NETLINK,
 			     MCHP_FRER_GENL_MS_ALLOC, 1, &sk, &msg);
+	if (rc < 0)
+		return rc;
 
 	nl_socket_modify_cb(sk, NL_CB_VALID, NL_CB_CUSTOM,
 			    mchp_frer_genl_ms_alloc_cb, &tmp);
@@ -436,7 +446,7 @@ static int cmd_msa(const struct command *cmd, int argc, char *const *argv)
 		command_help(cmd);
 		return 0;
 	}
-			
+
 	rc = mchp_frer_genl_ms_alloc(ifindex1, ifindex2, &ms_id);
 	if (rc == 0) {
 		printf("%u\n", ms_id);
@@ -454,6 +464,8 @@ static int mchp_frer_genl_ms_free(u32 ms_id)
 
 	rc = mchp_genl_start(MCHP_FRER_NETLINK,
 				MCHP_FRER_GENL_MS_FREE, 1, &sk, &msg);
+	if (rc < 0)
+		return rc;
 
 	NLA_PUT_U32(msg, MCHP_FRER_ATTR_ID, ms_id);
 
@@ -507,7 +519,7 @@ static int cmd_msf(const struct command *cmd, int argc, char *const *argv)
 		command_help(cmd);
 		return 0;
 	}
-			
+
 	return mchp_frer_genl_ms_free(ms_id);
 }
 
@@ -522,6 +534,8 @@ static int mchp_frer_genl_ms_cfg_set(u32 ifindex, u32 ms_id,
 
 	rc = mchp_genl_start(MCHP_FRER_NETLINK,
 				MCHP_FRER_GENL_MS_CFG_SET, 1, &sk, &msg);
+	if (rc < 0)
+		return rc;
 
 	NLA_PUT_U32(msg, MCHP_FRER_ATTR_ID, ms_id);
 	NLA_PUT_U32(msg, MCHP_FRER_ATTR_DEV1, ifindex);
@@ -579,6 +593,8 @@ static int mchp_frer_genl_ms_cfg_get(u32 ifindex, u32 ms_id,
 
 	rc = mchp_genl_start(MCHP_FRER_NETLINK,
 				MCHP_FRER_GENL_MS_CFG_GET, 1, &sk, &msg);
+	if (rc < 0)
+		return rc;
 
 	nl_socket_modify_cb(sk, NL_CB_VALID, NL_CB_CUSTOM,
 			    mchp_frer_genl_ms_cfg_get_cb, &tmp);
@@ -641,6 +657,8 @@ static int mchp_frer_genl_ms_cnt_get(u32 ifindex, u32 ms_id, struct mchp_frer_cn
 
 	rc = mchp_genl_start(MCHP_FRER_NETLINK,
 				MCHP_FRER_GENL_MS_CNT_GET, 1, &sk, &msg);
+	if (rc < 0)
+		return rc;
 
 	nl_socket_modify_cb(sk, NL_CB_VALID, NL_CB_CUSTOM,
 			    mchp_frer_genl_ms_cnt_get_cb, &tmp);
@@ -679,6 +697,8 @@ static int mchp_frer_genl_ms_cnt_clr(u32 ifindex, u32 ms_id)
 
 	rc = mchp_genl_start(MCHP_FRER_NETLINK,
 				MCHP_FRER_GENL_MS_CNT_CLR, 1, &sk, &msg);
+	if (rc < 0)
+		return rc;
 
 	NLA_PUT_U32(msg, MCHP_FRER_ATTR_ID, ms_id);
 	NLA_PUT_U32(msg, MCHP_FRER_ATTR_DEV1, ifindex);
@@ -794,7 +814,7 @@ static int cmd_ms(const struct command *cmd, int argc, char *const *argv)
 		command_help(cmd);
 		return 0;
 	}
-			
+
 	if (do_cnt) {
 		rc = mchp_frer_genl_ms_cnt_get(ifindex, ms_id, &cnt);
 		if (rc == 0) {
@@ -843,6 +863,8 @@ static int mchp_frer_genl_iflow_cfg_set(u32 id,
 
 	rc = mchp_genl_start(MCHP_FRER_NETLINK,
 				MCHP_FRER_GENL_IFLOW_CFG_SET, 1, &sk, &msg);
+	if (rc < 0)
+		return rc;
 
 	NLA_PUT_U32(msg, MCHP_FRER_ATTR_ID, id);
 	NLA_PUT_U32(msg, MCHP_FRER_ATTR_DEV1, cfg->ifindex1);
@@ -913,6 +935,8 @@ static int mchp_frer_genl_iflow_cfg_get(u32 id,
 
 	rc = mchp_genl_start(MCHP_FRER_NETLINK,
 				MCHP_FRER_GENL_IFLOW_CFG_GET, 1, &sk, &msg);
+	if (rc < 0)
+		return rc;
 
 	nl_socket_modify_cb(sk, NL_CB_VALID, NL_CB_CUSTOM,
 			    mchp_frer_genl_iflow_cfg_get_cb, &tmp);
@@ -1057,6 +1081,8 @@ static int mchp_frer_genl_vlan_cfg_set(u32 vid,
 
 	rc = mchp_genl_start(MCHP_FRER_NETLINK,
 				MCHP_FRER_GENL_VLAN_CFG_SET, 1, &sk, &msg);
+	if (rc < 0)
+		return rc;
 
 	NLA_PUT_U32(msg, MCHP_FRER_ATTR_ID, vid);
 	NLA_PUT(msg, MCHP_FRER_ATTR_VLAN_CFG, sizeof(*cfg), cfg);
@@ -1113,6 +1139,8 @@ static int mchp_frer_genl_vlan_cfg_get(u32 vid,
 
 	rc = mchp_genl_start(MCHP_FRER_NETLINK,
 				MCHP_FRER_GENL_VLAN_CFG_GET, 1, &sk, &msg);
+	if (rc < 0)
+		return rc;
 
 	nl_socket_modify_cb(sk, NL_CB_VALID, NL_CB_CUSTOM,
 			    mchp_frer_genl_vlan_cfg_get_cb, &tmp);
@@ -1190,7 +1218,7 @@ static int cmd_vlan(const struct command *cmd, int argc, char *const *argv)
 		command_help(cmd);
 		return 0;
 	}
-			
+
 	if (memcmp(&tmp, &cfg, sizeof(cfg)) == 0) {
 		printf("%-14s %8d\n", "flood_disable:", cfg.flood_disable);
 		printf("%-14s %8d\n", "learn_disable:", cfg.learn_disable);

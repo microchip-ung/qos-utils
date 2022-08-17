@@ -66,6 +66,11 @@ static int mchp_psfp_sf_conf_get(uint32_t sfi_id,
 
 	rc = mchp_genl_start(MCHP_PSFP_NETLINK,
 				MCHP_PSFP_SF_GENL_CONF_GET, 1, &sk, &msg);
+	if (rc < 0) {
+		printf("mchp_genl_start() failed, rc: %d (%s)\n", rc,
+				nl_geterror(rc));
+		return rc;
+	}
 
 	nl_socket_modify_cb(sk, NL_CB_VALID, NL_CB_CUSTOM,
 			    mchp_psfp_sf_conf_read, &tmp);
@@ -103,6 +108,11 @@ static int mchp_psfp_sf_conf_set(uint32_t sfi_id,
 
 	rc = mchp_genl_start(MCHP_PSFP_NETLINK,
 				MCHP_PSFP_SF_GENL_CONF_SET, 1, &sk, &msg);
+	if (rc < 0) {
+		printf("mchp_genl_start() failed, rc: %d (%s)\n", rc,
+				nl_geterror(rc));
+		return rc;
+	}
 
 	NLA_PUT(msg, MCHP_PSFP_SF_ATTR_CONF, sizeof(*conf), conf);
 	NLA_PUT_U32(msg, MCHP_PSFP_SF_ATTR_SFI, sfi_id);
@@ -159,6 +169,8 @@ static void mchp_psfp_sf_status_get(uint32_t sfi_id)
 
 	rc = mchp_genl_start(MCHP_PSFP_NETLINK,
 				MCHP_PSFP_SF_GENL_STATUS_GET, 1, &sk, &msg);
+	if (rc < 0)
+		return;
 
 	nl_socket_modify_cb(sk, NL_CB_VALID, NL_CB_CUSTOM,
 			    mchp_psfp_sf_counters_read, &counters);
@@ -295,6 +307,8 @@ static int mchp_psfp_sg_conf_get(uint32_t sgi_id,
 
 	rc = mchp_genl_start(MCHP_PSFP_NETLINK,
 				MCHP_PSFP_SG_GENL_CONF_GET, 1, &sk, &msg);
+	if (rc < 0)
+		return rc;
 
 	nl_socket_modify_cb(sk, NL_CB_VALID, NL_CB_CUSTOM,
 			    mchp_psfp_sg_conf_read, &tmp);
@@ -332,6 +346,8 @@ static int mchp_psfp_sg_conf_set(uint32_t sgi_id,
 
 	rc = mchp_genl_start(MCHP_PSFP_NETLINK,
 				MCHP_PSFP_SG_GENL_CONF_SET, 1, &sk, &msg);
+	if (rc < 0)
+		return rc;
 
 	NLA_PUT(msg, MCHP_PSFP_SG_ATTR_CONF, sizeof(*conf), conf);
 	NLA_PUT_U32(msg, MCHP_PSFP_SG_ATTR_SGI, sgi_id);
@@ -388,6 +404,8 @@ static void mchp_psfp_sg_status_get(uint32_t sgi_id)
 
 	rc = mchp_genl_start(MCHP_PSFP_NETLINK,
 				MCHP_PSFP_SG_GENL_STATUS_GET, 1, &sk, &msg);
+	if (rc < 0)
+		return;
 
 	nl_socket_modify_cb(sk, NL_CB_VALID, NL_CB_CUSTOM,
 			    mchp_psfp_sg_status_read, &status);
@@ -582,6 +600,8 @@ static int mchp_psfp_gce_conf_get(uint32_t sgi_id, uint32_t gce_id,
 
 	rc = mchp_genl_start(MCHP_PSFP_NETLINK,
 				MCHP_PSFP_GCE_GENL_CONF_GET, 1, &sk, &msg);
+	if (rc < 0)
+		return rc;
 
 	nl_socket_modify_cb(sk, NL_CB_VALID, NL_CB_CUSTOM,
 			    mchp_psfp_gce_conf_read, &tmp);
@@ -620,6 +640,8 @@ static int mchp_psfp_gce_conf_set(uint32_t sgi_id, uint32_t gce_id,
 
 	rc = mchp_genl_start(MCHP_PSFP_NETLINK,
 				MCHP_PSFP_GCE_GENL_CONF_SET, 1, &sk, &msg);
+	if (rc < 0)
+		return rc;
 
 	NLA_PUT(msg, MCHP_PSFP_GCE_ATTR_CONF, sizeof(*conf), conf);
 	NLA_PUT_U32(msg, MCHP_PSFP_GCE_ATTR_SGI, sgi_id);
@@ -677,6 +699,8 @@ static void mchp_psfp_gce_status_get(uint32_t sgi_id, uint32_t gce_id)
 
 	rc = mchp_genl_start(MCHP_PSFP_NETLINK,
 				MCHP_PSFP_GCE_GENL_STATUS_GET, 1, &sk, &msg);
+	if (rc < 0)
+		return;
 
 	nl_socket_modify_cb(sk, NL_CB_VALID, NL_CB_CUSTOM,
 			    mchp_psfp_gce_status_read, &status);
@@ -825,6 +849,8 @@ static int mchp_psfp_fm_conf_get(uint32_t fmi_id,
 
 	rc = mchp_genl_start(MCHP_PSFP_NETLINK,
 				MCHP_PSFP_FM_GENL_CONF_GET, 1, &sk, &msg);
+	if (rc < 0)
+		return rc;
 
 	nl_socket_modify_cb(sk, NL_CB_VALID, NL_CB_CUSTOM,
 			    mchp_psfp_fm_conf_read, &tmp);
@@ -862,6 +888,8 @@ static int mchp_psfp_fm_conf_set(uint32_t fmi_id,
 
 	rc = mchp_genl_start(MCHP_PSFP_NETLINK,
 				MCHP_PSFP_FM_GENL_CONF_SET, 1, &sk, &msg);
+	if (rc < 0)
+		return rc;
 
 	NLA_PUT(msg, MCHP_PSFP_FM_ATTR_CONF, sizeof(*conf), conf);
 	NLA_PUT_U32(msg, MCHP_PSFP_FM_ATTR_FMI, fmi_id);

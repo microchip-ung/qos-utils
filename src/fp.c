@@ -113,6 +113,9 @@ void mchp_conf_set(uint32_t index, struct mchp_qos_fp_port_conf *config)
 
 	rc = mchp_genl_start("mchp_netlink",
 				MCHP_QOS_FP_PORT_GENL_CONF_SET, 1, &sk, &msg);
+	if (rc < 0)
+		return;
+
 
 	NLA_PUT(msg, MCHP_QOS_FP_PORT_ATTR_CONF, sizeof(*config), config);
 	NLA_PUT_U32(msg, MCHP_QOS_FP_PORT_ATTR_IDX, index);
@@ -142,6 +145,8 @@ void mchp_conf_get(uint32_t index, struct mchp_qos_fp_port_conf *config)
 
 	rc = mchp_genl_start("mchp_netlink",
 				MCHP_QOS_FP_PORT_GENL_CONF_GET, 1, &sk, &msg);
+	if (rc < 0)
+		return;
 
 	nl_socket_modify_cb(sk, NL_CB_VALID, NL_CB_CUSTOM,
 			    mchp_qos_fp_port_read_conf, &tmp);
@@ -179,6 +184,8 @@ void mchp_status_get(uint32_t index)
 
 	rc = mchp_genl_start("mchp_netlink",
 				MCHP_QOS_FP_PORT_GENL_STATUS_GET, 1, &sk, &msg);
+	if (rc < 0)
+		return;
 
 	nl_socket_modify_cb(sk, NL_CB_VALID, NL_CB_CUSTOM,
 			    mchp_qos_fp_port_read_status, &status);

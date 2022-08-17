@@ -95,7 +95,9 @@ static int mchp_qos_genl_port_cfg_set(u32 ifindex,
 	int rc = 0;
 
 	rc = mchp_genl_start(MCHP_QOS_NETLINK,
-				MCHP_QOS_GENL_PORT_CFG_SET, 1, &sk, &msg);
+			MCHP_QOS_GENL_PORT_CFG_SET, 1, &sk, &msg);
+	if (rc < 0)
+		return rc;
 
 	NLA_PUT_U32(msg, MCHP_QOS_ATTR_DEV, ifindex);
 	NLA_PUT(msg, MCHP_QOS_ATTR_PORT_CFG, sizeof(*cfg), cfg);
@@ -152,6 +154,8 @@ static int mchp_qos_genl_port_cfg_get(u32 ifindex,
 
 	rc = mchp_genl_start(MCHP_QOS_NETLINK,
 				MCHP_QOS_GENL_PORT_CFG_GET, 1, &sk, &msg);
+	if (rc < 0)
+		return rc;
 
 	nl_socket_modify_cb(sk, NL_CB_VALID, NL_CB_CUSTOM,
 			    mchp_qos_genl_port_cfg_get_cb, &tmp);
@@ -190,6 +194,8 @@ static int mchp_qos_genl_dscp_prio_dpl_set(u32 dscp,
 
 	rc = mchp_genl_start(MCHP_QOS_NETLINK,
 				MCHP_QOS_GENL_DSCP_PRIO_DPL_SET, 1, &sk, &msg);
+	if (rc < 0)
+		return rc;
 
 	NLA_PUT_U32(msg, MCHP_QOS_ATTR_DSCP, dscp);
 	NLA_PUT(msg, MCHP_QOS_ATTR_DSCP_PRIO_DPL, sizeof(*cfg), cfg);
@@ -246,6 +252,8 @@ static int mchp_qos_genl_dscp_prio_dpl_get(u32 dscp,
 
 	rc = mchp_genl_start(MCHP_QOS_NETLINK,
 				MCHP_QOS_GENL_DSCP_PRIO_DPL_GET, 1, &sk, &msg);
+	if (rc < 0)
+		return rc;
 
 	nl_socket_modify_cb(sk, NL_CB_VALID, NL_CB_CUSTOM,
 			    mchp_qos_genl_dscp_prio_dpl_get_cb, &tmp);
