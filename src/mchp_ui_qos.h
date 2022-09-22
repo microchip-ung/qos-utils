@@ -6,7 +6,7 @@
 #ifndef _QOS_H_
 #define _QOS_H_
 
-#define MCHP_QOS_NETLINK "lan966x_qos_nl"
+#define MCHP_QOS_NETLINK "mchp_qos_nl"
 
 enum mchp_qos_attr {
 	MCHP_QOS_ATTR_NONE,
@@ -78,7 +78,7 @@ struct mchp_qos_dscp_prio_dpl {
 
 
 
-#define MCHP_FRER_NETLINK "lan966x_frer_nl"
+#define MCHP_FRER_NETLINK "mchp_frer_nl"
 
 enum mchp_frer_attr {
 	MCHP_FRER_ATTR_NONE,
@@ -163,7 +163,7 @@ struct mchp_frer_vlan_cfg {
 };
 
 
-#define MCHP_PSFP_NETLINK	"lan966x_psfp_nl"
+#define MCHP_PSFP_NETLINK	"mchp_psfp_nl"
 
 enum mchp_psfp_attr {
 	MCHP_PSFP_ATTR_NONE,
@@ -273,6 +273,9 @@ struct mchp_psfp_fm_conf {
 	bool mark_red_enable;
 	bool mark_red;
 };
+
+
+#define MCHP_FP_NETLINK "mchp_fp_nl"
 
 enum mchp_qos_fp_port_attr {
 	MCHP_QOS_FP_PORT_ATTR_NONE,

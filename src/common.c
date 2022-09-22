@@ -6,8 +6,8 @@
 #include "common.h"
 
 int mchp_genl_start(const char *family_name, uint8_t cmd,
-		       uint8_t version, struct nl_sock **skp,
-		       struct nl_msg **msgp)
+		    uint8_t version, struct nl_sock **skp,
+		    struct nl_msg **msgp)
 {
 	int err, family_id;
 

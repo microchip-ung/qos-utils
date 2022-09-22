@@ -95,7 +95,7 @@ static int mchp_qos_genl_port_cfg_set(u32 ifindex,
 	int rc = 0;
 
 	rc = mchp_genl_start(MCHP_QOS_NETLINK,
-			MCHP_QOS_GENL_PORT_CFG_SET, 1, &sk, &msg);
+			     MCHP_QOS_GENL_PORT_CFG_SET, 1, &sk, &msg);
 	if (rc < 0)
 		return rc;
 
@@ -153,7 +153,7 @@ static int mchp_qos_genl_port_cfg_get(u32 ifindex,
 	int rc = 0;
 
 	rc = mchp_genl_start(MCHP_QOS_NETLINK,
-				MCHP_QOS_GENL_PORT_CFG_GET, 1, &sk, &msg);
+			     MCHP_QOS_GENL_PORT_CFG_GET, 1, &sk, &msg);
 	if (rc < 0)
 		return rc;
 
@@ -193,7 +193,7 @@ static int mchp_qos_genl_dscp_prio_dpl_set(u32 dscp,
 	int rc = 0;
 
 	rc = mchp_genl_start(MCHP_QOS_NETLINK,
-				MCHP_QOS_GENL_DSCP_PRIO_DPL_SET, 1, &sk, &msg);
+			     MCHP_QOS_GENL_DSCP_PRIO_DPL_SET, 1, &sk, &msg);
 	if (rc < 0)
 		return rc;
 
@@ -251,7 +251,7 @@ static int mchp_qos_genl_dscp_prio_dpl_get(u32 dscp,
 	int rc = 0;
 
 	rc = mchp_genl_start(MCHP_QOS_NETLINK,
-				MCHP_QOS_GENL_DSCP_PRIO_DPL_GET, 1, &sk, &msg);
+			     MCHP_QOS_GENL_DSCP_PRIO_DPL_GET, 1, &sk, &msg);
 	if (rc < 0)
 		return rc;
 

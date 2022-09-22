@@ -65,7 +65,7 @@ static int mchp_psfp_sf_conf_get(uint32_t sfi_id,
 	int rc = 0;
 
 	rc = mchp_genl_start(MCHP_PSFP_NETLINK,
-				MCHP_PSFP_SF_GENL_CONF_GET, 1, &sk, &msg);
+			     MCHP_PSFP_SF_GENL_CONF_GET, 1, &sk, &msg);
 	if (rc < 0) {
 		printf("mchp_genl_start() failed, rc: %d (%s)\n", rc,
 				nl_geterror(rc));
@@ -107,7 +107,7 @@ static int mchp_psfp_sf_conf_set(uint32_t sfi_id,
 	int rc = 0;
 
 	rc = mchp_genl_start(MCHP_PSFP_NETLINK,
-				MCHP_PSFP_SF_GENL_CONF_SET, 1, &sk, &msg);
+			     MCHP_PSFP_SF_GENL_CONF_SET, 1, &sk, &msg);
 	if (rc < 0) {
 		printf("mchp_genl_start() failed, rc: %d (%s)\n", rc,
 				nl_geterror(rc));
@@ -168,7 +168,7 @@ static void mchp_psfp_sf_status_get(uint32_t sfi_id)
 	memset(&counters, 0x0, sizeof(counters));
 
 	rc = mchp_genl_start(MCHP_PSFP_NETLINK,
-				MCHP_PSFP_SF_GENL_STATUS_GET, 1, &sk, &msg);
+			     MCHP_PSFP_SF_GENL_STATUS_GET, 1, &sk, &msg);
 	if (rc < 0)
 		return;
 
@@ -306,7 +306,7 @@ static int mchp_psfp_sg_conf_get(uint32_t sgi_id,
 	int rc = 0;
 
 	rc = mchp_genl_start(MCHP_PSFP_NETLINK,
-				MCHP_PSFP_SG_GENL_CONF_GET, 1, &sk, &msg);
+			     MCHP_PSFP_SG_GENL_CONF_GET, 1, &sk, &msg);
 	if (rc < 0)
 		return rc;
 
@@ -345,7 +345,7 @@ static int mchp_psfp_sg_conf_set(uint32_t sgi_id,
 	int rc = 0;
 
 	rc = mchp_genl_start(MCHP_PSFP_NETLINK,
-				MCHP_PSFP_SG_GENL_CONF_SET, 1, &sk, &msg);
+			     MCHP_PSFP_SG_GENL_CONF_SET, 1, &sk, &msg);
 	if (rc < 0)
 		return rc;
 
@@ -403,7 +403,7 @@ static void mchp_psfp_sg_status_get(uint32_t sgi_id)
 	memset(&status, 0x0, sizeof(status));
 
 	rc = mchp_genl_start(MCHP_PSFP_NETLINK,
-				MCHP_PSFP_SG_GENL_STATUS_GET, 1, &sk, &msg);
+			     MCHP_PSFP_SG_GENL_STATUS_GET, 1, &sk, &msg);
 	if (rc < 0)
 		return;
 
@@ -599,7 +599,7 @@ static int mchp_psfp_gce_conf_get(uint32_t sgi_id, uint32_t gce_id,
 	int rc = 0;
 
 	rc = mchp_genl_start(MCHP_PSFP_NETLINK,
-				MCHP_PSFP_GCE_GENL_CONF_GET, 1, &sk, &msg);
+			     MCHP_PSFP_GCE_GENL_CONF_GET, 1, &sk, &msg);
 	if (rc < 0)
 		return rc;
 
@@ -639,7 +639,7 @@ static int mchp_psfp_gce_conf_set(uint32_t sgi_id, uint32_t gce_id,
 	int rc = 0;
 
 	rc = mchp_genl_start(MCHP_PSFP_NETLINK,
-				MCHP_PSFP_GCE_GENL_CONF_SET, 1, &sk, &msg);
+			     MCHP_PSFP_GCE_GENL_CONF_SET, 1, &sk, &msg);
 	if (rc < 0)
 		return rc;
 
@@ -698,7 +698,7 @@ static void mchp_psfp_gce_status_get(uint32_t sgi_id, uint32_t gce_id)
 	memset(&status, 0x0, sizeof(status));
 
 	rc = mchp_genl_start(MCHP_PSFP_NETLINK,
-				MCHP_PSFP_GCE_GENL_STATUS_GET, 1, &sk, &msg);
+			     MCHP_PSFP_GCE_GENL_STATUS_GET, 1, &sk, &msg);
 	if (rc < 0)
 		return;
 
@@ -848,7 +848,7 @@ static int mchp_psfp_fm_conf_get(uint32_t fmi_id,
 	int rc = 0;
 
 	rc = mchp_genl_start(MCHP_PSFP_NETLINK,
-				MCHP_PSFP_FM_GENL_CONF_GET, 1, &sk, &msg);
+			     MCHP_PSFP_FM_GENL_CONF_GET, 1, &sk, &msg);
 	if (rc < 0)
 		return rc;
 
@@ -887,7 +887,7 @@ static int mchp_psfp_fm_conf_set(uint32_t fmi_id,
 	int rc = 0;
 
 	rc = mchp_genl_start(MCHP_PSFP_NETLINK,
-				MCHP_PSFP_FM_GENL_CONF_SET, 1, &sk, &msg);
+			     MCHP_PSFP_FM_GENL_CONF_SET, 1, &sk, &msg);
 	if (rc < 0)
 		return rc;
 

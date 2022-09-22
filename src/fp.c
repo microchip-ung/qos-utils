@@ -111,8 +111,8 @@ void mchp_conf_set(uint32_t index, struct mchp_qos_fp_port_conf *config)
 	struct nl_msg *msg;
 	int rc;
 
-	rc = mchp_genl_start("mchp_netlink",
-				MCHP_QOS_FP_PORT_GENL_CONF_SET, 1, &sk, &msg);
+	rc = mchp_genl_start(MCHP_FP_NETLINK,
+			     MCHP_QOS_FP_PORT_GENL_CONF_SET, 1, &sk, &msg);
 	if (rc < 0)
 		return;
 
@@ -143,8 +143,8 @@ void mchp_conf_get(uint32_t index, struct mchp_qos_fp_port_conf *config)
 	struct nl_msg *msg;
 	int rc;
 
-	rc = mchp_genl_start("mchp_netlink",
-				MCHP_QOS_FP_PORT_GENL_CONF_GET, 1, &sk, &msg);
+	rc = mchp_genl_start(MCHP_FP_NETLINK,
+			     MCHP_QOS_FP_PORT_GENL_CONF_GET, 1, &sk, &msg);
 	if (rc < 0)
 		return;
 
@@ -182,8 +182,8 @@ void mchp_status_get(uint32_t index)
 	memset(&status, 0x0, sizeof(status));
 	memset(ifname, 0, IF_NAMESIZE);
 
-	rc = mchp_genl_start("mchp_netlink",
-				MCHP_QOS_FP_PORT_GENL_STATUS_GET, 1, &sk, &msg);
+	rc = mchp_genl_start(MCHP_FP_NETLINK,
+			     MCHP_QOS_FP_PORT_GENL_STATUS_GET, 1, &sk, &msg);
 	if (rc < 0)
 		return;
 

@@ -100,7 +100,7 @@ static int mchp_frer_genl_cs_cfg_get(u32 cs_id,
 	int rc = 0;
 
 	rc = mchp_genl_start(MCHP_FRER_NETLINK,
-				MCHP_FRER_GENL_CS_CFG_GET, 1, &sk, &msg);
+			     MCHP_FRER_GENL_CS_CFG_GET, 1, &sk, &msg);
 	if (rc < 0)
 		return rc;
 
@@ -163,7 +163,7 @@ static int mchp_frer_genl_cs_cnt_get(u32 cs_id, struct mchp_frer_cnt *cnt)
 	int rc = 0;
 
 	rc = mchp_genl_start(MCHP_FRER_NETLINK,
-				MCHP_FRER_GENL_CS_CNT_GET, 1, &sk, &msg);
+			     MCHP_FRER_GENL_CS_CNT_GET, 1, &sk, &msg);
 	if (rc < 0)
 		return rc;
 
@@ -202,7 +202,7 @@ static int mchp_frer_genl_cs_cnt_clr(u32 cs_id)
 	int rc = 0;
 
 	rc = mchp_genl_start(MCHP_FRER_NETLINK,
-				MCHP_FRER_GENL_CS_CNT_CLR, 1, &sk, &msg);
+			     MCHP_FRER_GENL_CS_CNT_CLR, 1, &sk, &msg);
 	if (rc < 0)
 		return rc;
 
