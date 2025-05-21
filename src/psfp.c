@@ -5,8 +5,6 @@
 
 #include "common.h"
 #include <getopt.h>
-#include "kernel_types.h"
-#include "mchp_ui_qos.h"
 
 /* commands */
 struct command

@@ -7,8 +7,6 @@
 #include <getopt.h>
 #include <errno.h>
 #include <net/if.h>
-#include "kernel_types.h"
-#include "mchp_ui_qos.h"
 
 struct command
 {

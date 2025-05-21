@@ -3,13 +3,39 @@
  * Copyright (c) 2020 Microchip Corporation
  */
 
+#include <stdlib.h>
 #include "common.h"
+
+#define MCHP_QOS_NL_EVAR	"MCHP_NETLINK_QOS"
+#define MCHP_FP_NL_EVAR		"MCHP_NETLINK_FP"
+#define MCHP_FRER_NL_EVAR	"MCHP_NETLINK_FRER"
+#define MCHP_PSFP_NL_EVAR	"MCHP_NETLINK_PSFP"
+
+static const char *rd_family_evar(const char *family_name) {
+	char *fenv = NULL;
+
+	if (strcmp(family_name, MCHP_QOS_NETLINK) == 0) {
+		fenv = getenv(MCHP_QOS_NL_EVAR);
+	} else if (strcmp(family_name, MCHP_FRER_NETLINK) == 0) {
+		fenv = getenv(MCHP_FRER_NL_EVAR);
+	} else if (strcmp(family_name, MCHP_FP_NETLINK) == 0) {
+		fenv = getenv(MCHP_FP_NL_EVAR);
+	} else if (strcmp(family_name, MCHP_PSFP_NETLINK) == 0) {
+		fenv = getenv(MCHP_PSFP_NL_EVAR);
+	}
+
+	if (fenv)
+		return fenv;
+
+	return family_name;
+}
 
 int mchp_genl_start(const char *family_name, uint8_t cmd,
 		    uint8_t version, struct nl_sock **skp,
 		    struct nl_msg **msgp)
 {
 	int err, family_id;
+	const char *fname;
 
 	*skp = nl_socket_alloc();
 	if (!*skp) {
@@ -23,9 +49,10 @@ int mchp_genl_start(const char *family_name, uint8_t cmd,
 		goto err_free_socket;
 	}
 
-	err = genl_ctrl_resolve(*skp, family_name);
+	fname = rd_family_evar(family_name);
+	err = genl_ctrl_resolve(*skp, fname);
 	if (err < 0) {
-		printf("genl_ctrl_resolve() failed\n");
+		printf("genl_ctrl_resolve() failed family name: '%s'\n", fname);
 		goto err_free_socket;
 	}
 	family_id = err;

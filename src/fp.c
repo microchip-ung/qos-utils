@@ -6,8 +6,6 @@
 #include "common.h"
 #include <getopt.h>
 #include <net/if.h>
-#include "kernel_types.h"
-#include "mchp_ui_qos.h"
 
 static struct nla_policy mchp_qos_fp_port_genl_policy[MCHP_QOS_FP_PORT_ATTR_END] = {
 	[MCHP_QOS_FP_PORT_ATTR_NONE] = { .type = NLA_UNSPEC },

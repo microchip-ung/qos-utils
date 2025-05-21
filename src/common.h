@@ -11,6 +11,8 @@
 #include <inttypes.h>
 #include <netlink/genl/genl.h>
 #include <netlink/genl/ctrl.h>
+#include "kernel_types.h"
+#include "mchp_ui_qos.h"
 
 /* Make debugging of user interface possible
  * by faking an ok return when running on a PC */
