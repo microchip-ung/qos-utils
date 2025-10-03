@@ -521,6 +521,153 @@ static int cmd_msf(const struct command *cmd, int argc, char *const *argv)
 	return mchp_frer_genl_ms_free(ms_id);
 }
 
+/* cmd_iflowa */
+static int mchp_frer_genl_iflowa_alloc(u32 *isdx)
+{
+	RETURN_IF_PC;
+	struct nl_sock *sk;
+	struct nl_msg *msg;
+	int rc = 0;
+	u32 tmp;
+
+	rc = mchp_genl_start(MCHP_FRER_NETLINK,
+			     MCHP_FRER_GENL_ISDX_ALLOC, 1, &sk, &msg);
+	if (rc < 0)
+		return rc;
+
+	nl_socket_modify_cb(sk, NL_CB_VALID, NL_CB_CUSTOM,
+			    mchp_frer_genl_ms_alloc_cb, &tmp);
+
+	rc = nl_send_auto(sk, msg);
+	if (rc < 0) {
+		printf("nl_send_auto() failed, rc: %d\n", rc);
+		goto nla_put_failure;
+	}
+
+	rc = nl_recvmsgs_default(sk);
+	if (rc < 0) {
+		printf("nl_recvmsgs_default() failed, rc: %d (%s)\n", rc,
+		       nl_geterror(rc));
+		goto nla_put_failure;
+	}
+
+	*isdx = tmp;
+
+nla_put_failure:
+	nlmsg_free(msg);
+	nl_socket_free(sk);
+
+	return rc;
+}
+
+static char *mchp_frer_iflowa_help(void)
+{
+	return "Allocate an ISDX index\n"
+		" --help:                   Show this help text\n";
+}
+
+static int cmd_iflowa(const struct command *cmd, int argc, char *const *argv)
+{
+	static struct option long_options[] =
+	{
+		{"help", no_argument, NULL, 'h'},
+		{NULL, 0, NULL, 0}
+	};
+	int do_help = 0;
+	u32 isdx = 0;
+	int ch, rc;
+
+	while ((ch = getopt_long(argc, argv, "h", long_options, NULL)) != -1) {
+		switch (ch) {
+		case 'h':
+		case '?':
+			do_help = 1;
+			break;
+		}
+	}
+
+	if (do_help) {
+		command_help(cmd);
+		return 0;
+	}
+
+	rc = mchp_frer_genl_iflowa_alloc(&isdx);
+	if (rc == 0) {
+		printf("%u\n", isdx);
+	}
+	return rc;
+}
+
+/* cmd_iflowf */
+static int mchp_frer_genl_iflowf_free(u32 isdx)
+{
+	RETURN_IF_PC;
+	struct nl_sock *sk;
+	struct nl_msg *msg;
+	int rc = 0;
+
+	rc = mchp_genl_start(MCHP_FRER_NETLINK,
+			     MCHP_FRER_GENL_ISDX_FREE, 1, &sk, &msg);
+	if (rc < 0)
+		return rc;
+
+	NLA_PUT_U32(msg, MCHP_FRER_ATTR_ID, isdx);
+
+	rc = nl_send_auto(sk, msg);
+	if (rc < 0) {
+		printf("nl_send_auto() failed, rc: %d\n", rc);
+		goto nla_put_failure;
+	}
+
+	rc = nl_recvmsgs_default(sk);
+	if (rc < 0)
+		printf("nl_recvmsgs_default() failed, rc: %d (%s)\n", rc,
+		       nl_geterror(rc));
+
+nla_put_failure:
+	nlmsg_free(msg);
+	nl_socket_free(sk);
+
+	return rc;
+}
+
+static char *mchp_frer_iflowf_help(void)
+{
+	return "Free an ISDX index\n"
+		" --help:                   Show this help text\n";
+}
+
+static int cmd_iflowf(const struct command *cmd, int argc, char *const *argv)
+{
+	static struct option long_options[] =
+	{
+		{"help", no_argument, NULL, 'h'},
+		{NULL, 0, NULL, 0}
+	};
+	int do_help = 0;
+	u32 isdx = 0;
+	int ch;
+
+	/* read the id */
+	isdx = atoi(argv[0]);
+
+	while ((ch = getopt_long(argc, argv, "h", long_options, NULL)) != -1) {
+		switch (ch) {
+		case 'h':
+		case '?':
+			do_help = 1;
+			break;
+		}
+	}
+
+	if (do_help) {
+		command_help(cmd);
+		return 0;
+	}
+
+	return mchp_frer_genl_iflowf_free(isdx);
+}
+
 /* cmd_ms */
 static int mchp_frer_genl_ms_cfg_set(u32 ifindex, u32 ms_id,
 					const struct mchp_frer_stream_cfg *cfg)
@@ -1235,6 +1382,8 @@ static const struct command commands[] =
 	{2, "ms", cmd_ms, "ms dev ms_id [options]", mchp_frer_ms_help},
 	{1, "iflow", cmd_iflow, "iflow id [options]", mchp_frer_iflow_help},
 	{1, "vlan", cmd_vlan, "vlan vid [options]", mchp_frer_vlan_help},
+	{0, "iflowa", cmd_iflowa, "iflowa [options]", mchp_frer_iflowa_help},
+	{1, "iflowf", cmd_iflowf, "iflowf id [options]", mchp_frer_iflowf_help},
 };
 
 static void command_help(const struct command *cmd)
@@ -1250,7 +1399,7 @@ static void command_help_all(void)
 
 static void help(void)
 {
-	printf("Usage: frer cs|msa|msf|ms|iflow|vlan [options]\n");
+	printf("Usage: frer cs|msa|msf|ms|iflow|vlan|iflowa|iflowf [options]\n");
 	printf("options:\n");
 	printf(" --help                    Show this help text\n");
 	printf("commands:\n");
