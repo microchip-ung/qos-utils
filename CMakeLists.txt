@@ -28,3 +28,7 @@ add_executable(qos src/qos.c src/common.c)
 target_link_libraries(qos ${LIBNL_LIBRARIES})
 install(TARGETS qos DESTINATION bin)
 
+add_executable(afi src/afi.c)
+target_link_libraries(afi ${LIBNL_LIBRARIES})
+install(TARGETS afi DESTINATION bin)
+

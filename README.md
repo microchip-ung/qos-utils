@@ -19,6 +19,7 @@ add upstream support for the features present in this repository.
 | frer     | Configuration og Frame Replication and Elimination | IEEE 802.1CB  |
 | psfp     | Configuration of Per-Stream Filtering and Policing | IEEE 802.1Qci |
 | qos      | Configuration of Quality Of Service                | IEEE 802.1p   |
+| afi      | Hardware frame generation (fast injection / DTI)   | -             |
 
 
 ## How to build
