@@ -1069,6 +1069,8 @@ int main(int argc, char *argv[])
 	int f;
 	int ret;
 
+	mchp_version_check(argc, argv, "psfp");
+
 	/* skip program name ('psfp') */
 	argv++;
 	argc--;

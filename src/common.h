@@ -29,4 +29,6 @@ int mchp_genl_start(const char *family_name, uint8_t cmd,
 		       uint8_t version, struct nl_sock **skp,
 		       struct nl_msg **msgp);
 
+void mchp_version_check(int argc, char *argv[], const char *prog);
+
 #endif /* _COMMON_H_ */

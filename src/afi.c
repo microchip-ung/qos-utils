@@ -20,6 +20,8 @@
 #include <netlink/genl/genl.h>
 #include <netlink/genl/ctrl.h>
 
+#include "version.h"
+
 #define AFI_NETLINK_NAME	"mchp_afi"
 #define AFI_NETLINK_VERSION	1
 
@@ -705,7 +707,10 @@ static void usage(const char *prog)
 "\n"
 "  wait-done <ifname> --id N [--timeout S] [--poll S]\n"
 "      Poll a finite-seq flow until injected (seq_cnt=0). Exits non-zero on\n"
-"      timeout (default 30s, poll 0.2s).\n",
+"      timeout (default 30s, poll 0.2s).\n"
+"\n"
+"  -v, --version\n"
+"      Print the tool version and exit.\n",
 		prog, ETH_WIRE_OVERHEAD);
 }
 
@@ -755,6 +760,10 @@ int main(int argc, char *argv[])
 	action = argv[1];
 	if (strcmp(action, "-h") == 0 || strcmp(action, "--help") == 0) {
 		usage(argv[0]);
+		return 0;
+	}
+	if (strcmp(action, "-v") == 0 || strcmp(action, "--version") == 0) {
+		printf("afi version: %s\n", gGIT_VERSION);
 		return 0;
 	}
 

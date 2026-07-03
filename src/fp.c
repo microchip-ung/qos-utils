@@ -224,6 +224,8 @@ int main(int argc, char *argv[])
 	int status = 0;
 	int help = 0;
 
+	mchp_version_check(argc, argv, "fp");
+
 	memset(&config, 0, sizeof(config));
 
 	while ((ch = getopt_long(argc, argv, "a:b:c:d:e:f:gh", long_options, NULL)) != -1) {

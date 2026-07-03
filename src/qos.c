@@ -828,6 +828,8 @@ int main(int argc, char *argv[])
 {
 	const struct command *cmd;
 
+	mchp_version_check(argc, argv, "qos");
+
 	/* skip program name ('qos') */
 	argv++;
 	argc--;

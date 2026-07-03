@@ -1439,6 +1439,8 @@ int main(int argc, char *argv[])
 {
 	const struct command *cmd;
 
+	mchp_version_check(argc, argv, "frer");
+
 	/* skip program name ('frer') */
 	argv++;
 	argc--;

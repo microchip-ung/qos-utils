@@ -3,8 +3,24 @@
  * Copyright (c) 2020 Microchip Corporation
  */
 
+#include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "common.h"
+#include "version.h"
+
+void mchp_version_check(int argc, char *argv[], const char *prog)
+{
+	int i;
+
+	for (i = 1; i < argc; i++) {
+		if (strcmp(argv[i], "-v") == 0 ||
+		    strcmp(argv[i], "--version") == 0) {
+			printf("%s version: %s\n", prog, gGIT_VERSION);
+			exit(0);
+		}
+	}
+}
 
 #define MCHP_QOS_NL_EVAR	"MCHP_NETLINK_QOS"
 #define MCHP_FP_NL_EVAR		"MCHP_NETLINK_FP"
